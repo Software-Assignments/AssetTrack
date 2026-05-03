@@ -33,7 +33,6 @@ build/
 .vscode/
 
 ### Java ###
-*.class
 *.log
 hs_err_pid*
 replay_pid*
