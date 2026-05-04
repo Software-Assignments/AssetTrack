@@ -3,12 +3,15 @@ package com.example.assettrack.service;
 import com.example.assettrack.dto.AllocationRequestDTO;
 import com.example.assettrack.dto.AssetResponseDTO;
 import com.example.assettrack.dto.ReturnRequestDTO;
-import com.example.assettrack.domain.*;
+import com.example.assettrack.domain.AllocationHistory;
+import com.example.assettrack.domain.Asset;
+import com.example.assettrack.domain.AssetStatus;
+import com.example.assettrack.domain.User;
 import com.example.assettrack.repository.AllocationHistoryRepository;
 import com.example.assettrack.repository.UserRepository;
-import com.example.assettrack.service.exception.BadRequestException;
-import com.example.assettrack.service.exception.ConflictException;
-import com.example.assettrack.service.exception.NotFoundException;
+import com.example.assettrack.exception.BadRequestException;
+import com.example.assettrack.exception.ConflictException;
+import com.example.assettrack.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +40,7 @@ public class AllocationService {
         User user = userRepository.findById(request.getUserId())
             .orElseThrow(() -> new NotFoundException("User not found."));
 
-        if (user.getStatus() == UserStatus.INACTIVE) {
+        if (!user.isEnabled()) {
             throw new BadRequestException("Cannot assign asset to an inactive user.");
         }
 

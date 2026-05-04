@@ -1,4 +1,4 @@
-package com.example.assettrack.service.exception;
+package com.example.assettrack.exception;
 
 public class ForbiddenException extends RuntimeException {
     public ForbiddenException(String message) {

@@ -4,11 +4,15 @@ import com.example.assettrack.dto.AssetCreateRequestDTO;
 import com.example.assettrack.dto.AssetResponseDTO;
 import com.example.assettrack.dto.AssetUpdateRequestDTO;
 import com.example.assettrack.dto.SpareLaptopResponseDTO;
-import com.example.assettrack.domain.*;
+import com.example.assettrack.domain.AllocationHistory;
+import com.example.assettrack.domain.Asset;
+import com.example.assettrack.domain.AssetStatus;
+import com.example.assettrack.domain.AssetType;
+import com.example.assettrack.domain.User;
 import com.example.assettrack.repository.AllocationHistoryRepository;
 import com.example.assettrack.repository.AssetRepository;
-import com.example.assettrack.service.exception.ConflictException;
-import com.example.assettrack.service.exception.NotFoundException;
+import com.example.assettrack.exception.ConflictException;
+import com.example.assettrack.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -95,7 +99,7 @@ public class AssetService {
         AssetStatus status,
         AssetType type,
         String brand,
-        UserStatus userStatus
+        Boolean assignedToEnabled
     ) {
         refreshExpiredLaptops();
         Specification<Asset> spec = (root, query, cb) -> cb.conjunction();
@@ -112,10 +116,10 @@ public class AssetService {
         if (brand != null && !brand.isBlank()) {
             spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("brand")), brand.toLowerCase()));
         }
-        if (userStatus != null) {
+        if (assignedToEnabled != null) {
             spec = spec.and((root, query, cb) -> {
                 var join = root.join("currentOwner", JoinType.LEFT);
-                return cb.equal(join.get("status"), userStatus);
+                return cb.equal(join.get("enabled"), assignedToEnabled);
             });
         }
 
