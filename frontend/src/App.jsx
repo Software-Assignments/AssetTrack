@@ -1,8 +1,6 @@
-// App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Import all pages
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import AssetListPage from './pages/AssetListPage';
@@ -25,9 +23,9 @@ export default function App() {
           {/* Protected */}
           <Route element={<ProtectedRoute />}>
             <Route path="/assets" element={<AssetListPage />} />
-            <Route path="/assets/:id" element={<AssetDetailPage />} />
             <Route path="/assets/register" element={<AssetRegistrationPage />} />
             <Route path="/assets/assign" element={<AssignTransferPage />} />
+            <Route path="/assets/:id" element={<AssetDetailPage />} />
             <Route path="/search" element={<AdvancedSearchPage />} />
             <Route path="/search/results" element={<SearchResultsPage />} />
             <Route path="/condition-report" element={<ConditionReportPage />} />
