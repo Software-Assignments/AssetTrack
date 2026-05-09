@@ -75,7 +75,7 @@ export default function AssetListPage() {
                 {/* Spare laptop widget */}
                 <div className="spare-widget">
                     <button className="btn btn-primary btn-sm" onClick={findSpare} disabled={spareLoading}>
-                        {spareLoading ? 'Searching…' : '⚡ Find Available Spare Laptop'}
+                        {spareLoading ? 'Searching…' : 'Find Available Spare Laptop'}
                     </button>
                     {spareMsg && <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{spareMsg}</span>}
                     {spare && (
