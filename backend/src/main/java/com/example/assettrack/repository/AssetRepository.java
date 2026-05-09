@@ -19,6 +19,9 @@ public interface AssetRepository extends JpaRepository<Asset, Long>, JpaSpecific
 
     List<Asset> findByTypeAndStatusAndWarrantyExpiryBefore(AssetType type, AssetStatus status, LocalDate date);
 
+    /** All assets of any type whose warranty has passed and are still in the given statuses. */
+    List<Asset> findByStatusInAndWarrantyExpiryBefore(List<AssetStatus> statuses, LocalDate date);
+
     Optional<Asset> findFirstByTypeAndStatusOrderByIdAsc(AssetType type, AssetStatus status);
 }
 

@@ -11,6 +11,7 @@ import com.example.assettrack.domain.AssetType;
 import com.example.assettrack.domain.User;
 import com.example.assettrack.repository.AllocationHistoryRepository;
 import com.example.assettrack.repository.AssetRepository;
+import com.example.assettrack.exception.BadRequestException;
 import com.example.assettrack.exception.ConflictException;
 import com.example.assettrack.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,12 +85,13 @@ public class AssetService {
             asset.setStatus(request.getStatus());
         }
 
-        return toResponse(asset, defaultExpiryWindowDays);
+        Asset saved = assetRepository.save(asset);
+        return toResponse(saved, defaultExpiryWindowDays);
     }
 
     @Transactional
     public AssetResponseDTO getAsset(Long assetId) {
-        refreshExpiredLaptops();
+        refreshExpiredAssets();
         return toResponse(getAssetEntity(assetId), defaultExpiryWindowDays);
     }
 
@@ -102,7 +104,7 @@ public class AssetService {
         Boolean assignedToEnabled,
         String assignedUser
     ) {
-        refreshExpiredLaptops();
+        refreshExpiredAssets();
         Specification<Asset> spec = (root, query, cb) -> cb.conjunction();
 
         if (serialNumber != null && !serialNumber.isBlank()) {
@@ -140,7 +142,7 @@ public class AssetService {
 
     @Transactional
     public List<AssetResponseDTO> getExpiringAssets(Integer windowDays) {
-        refreshExpiredLaptops();
+        refreshExpiredAssets();
         int window = windowDays != null ? windowDays : defaultExpiryWindowDays;
         LocalDate now = LocalDate.now();
         LocalDate end = now.plusDays(window);
@@ -154,7 +156,7 @@ public class AssetService {
 
     @Transactional
     public SpareLaptopResponseDTO findSpareLaptop() {
-        refreshExpiredLaptops();
+        refreshExpiredAssets();
         Asset asset = assetRepository
             .findFirstByTypeAndStatusOrderByIdAsc(AssetType.LAPTOP, AssetStatus.AVAILABLE)
             .orElseThrow(() -> new NotFoundException("No available spare laptop found."));
@@ -189,7 +191,7 @@ public class AssetService {
 
     @Transactional
     public List<AssetResponseDTO> listAssets() {
-        refreshExpiredLaptops();
+        refreshExpiredAssets();
         List<AssetResponseDTO> responses = new ArrayList<>();
         for (Asset asset : assetRepository.findAll()) {
             responses.add(toResponse(asset, defaultExpiryWindowDays));
@@ -204,6 +206,31 @@ public class AssetService {
             throw new ConflictException("Cannot delete an asset that is currently assigned.");
         }
         assetRepository.delete(asset);
+    }
+
+    /**
+     * Transitions an asset into IN_REPAIR (markInRepair=true) or back to
+     * AVAILABLE (markInRepair=false). An asset that is DECOMMISSIONED or
+     * EXPIRED cannot be sent to repair.
+     */
+    @Transactional
+    public AssetResponseDTO setRepairStatus(Long assetId, boolean markInRepair) {
+        Asset asset = getAssetEntity(assetId);
+        if (markInRepair) {
+            if (asset.getStatus() == AssetStatus.DECOMMISSIONED || asset.getStatus() == AssetStatus.EXPIRED) {
+                throw new BadRequestException("Cannot send a DECOMMISSIONED or EXPIRED asset to repair.");
+            }
+            asset.setStatus(AssetStatus.IN_REPAIR);
+        } else {
+            if (asset.getStatus() != AssetStatus.IN_REPAIR) {
+                throw new BadRequestException("Asset is not currently IN_REPAIR.");
+            }
+            // Return to AVAILABLE; if it was assigned before the repair the
+            // admin should re-allocate it manually via the allocation endpoint.
+            asset.setStatus(AssetStatus.AVAILABLE);
+        }
+        Asset saved = assetRepository.save(asset);
+        return toResponse(saved, defaultExpiryWindowDays);
     }
 
     private AssetResponseDTO toResponse(Asset asset, int windowDays) {
@@ -260,10 +287,9 @@ public class AssetService {
         return "";
     }
 
-    private void refreshExpiredLaptops() {
+    private void refreshExpiredAssets() {
         LocalDate today = LocalDate.now();
         Specification<Asset> spec = (root, query, cb) -> cb.and(
-            cb.equal(root.get("type"), AssetType.LAPTOP),
             cb.lessThan(root.get("warrantyExpiry"), today),
             cb.notEqual(root.get("status"), AssetStatus.DECOMMISSIONED),
             cb.notEqual(root.get("status"), AssetStatus.EXPIRED)

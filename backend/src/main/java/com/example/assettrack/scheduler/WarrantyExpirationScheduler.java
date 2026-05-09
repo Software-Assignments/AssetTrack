@@ -3,10 +3,10 @@ package com.example.assettrack.scheduler;
 import com.example.assettrack.domain.*;
 import com.example.assettrack.repository.AssetRepository;
 import com.example.assettrack.repository.UserRepository;
+import com.example.assettrack.service.AlertSettingsService;
 import com.example.assettrack.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ import java.util.List;
  * 2. Detect assets with already expired warranties
  * 3. Create in-app notifications for ADMIN and MANAGER roles
  * 4. Send email notifications to ADMIN users
- * 5. Auto-flag expired laptops
+ * 5. Auto-flag expired assets (all types)
  */
 @Component
 @RequiredArgsConstructor
@@ -30,9 +30,7 @@ public class WarrantyExpirationScheduler {
     private final AssetRepository assetRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
-
-    @Value("${assettrack.expiration.window-days:30}")
-    private int windowDays;
+    private final AlertSettingsService alertSettingsService;
 
     /**
      * Runs every day at 8:00 AM.
@@ -41,6 +39,7 @@ public class WarrantyExpirationScheduler {
     @Transactional
     public void checkWarrantyExpirations() {
         log.info("Running warranty expiration check...");
+        int windowDays = alertSettingsService.getSettings().getWarrantyExpiryDays();
         LocalDate today = LocalDate.now();
         LocalDate windowEnd = today.plusDays(windowDays);
 
@@ -72,13 +71,11 @@ public class WarrantyExpirationScheduler {
             }
         }
 
-        // 2. Find expired assets that haven't been flagged yet
-        List<Asset> expiredLaptops = assetRepository.findByTypeAndStatusAndWarrantyExpiryBefore(
-                AssetType.LAPTOP, AssetStatus.ASSIGNED, today);
-        expiredLaptops.addAll(assetRepository.findByTypeAndStatusAndWarrantyExpiryBefore(
-                AssetType.LAPTOP, AssetStatus.AVAILABLE, today));
+        // 2. Find expired assets (any type) that haven't been flagged yet
+        List<Asset> expiredAssets = assetRepository.findByStatusInAndWarrantyExpiryBefore(
+                List.of(AssetStatus.ASSIGNED, AssetStatus.AVAILABLE, AssetStatus.IN_REPAIR), today);
 
-        for (Asset asset : expiredLaptops) {
+        for (Asset asset : expiredAssets) {
             asset.setStatus(AssetStatus.EXPIRED);
 
             String message = String.format(
@@ -95,7 +92,7 @@ public class WarrantyExpirationScheduler {
         }
 
         log.info("Warranty check complete. Expiring soon: {}, Newly expired: {}",
-                expiringSoon.size(), expiredLaptops.size());
+                expiringSoon.size(), expiredAssets.size());
     }
 
     private void sendEmailToAdmins(Asset asset, String subjectSuffix, String message) {

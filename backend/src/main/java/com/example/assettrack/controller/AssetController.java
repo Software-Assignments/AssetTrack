@@ -32,7 +32,7 @@ public class AssetController {
 
     // ADMIN + MANAGER: list all assets
     @GetMapping
-    // @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<List<AssetResponseDTO>> listAssets() {
         return ResponseEntity.ok(assetService.listAssets());
     }
@@ -48,7 +48,7 @@ public class AssetController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AssetResponseDTO> updateAsset(
             @PathVariable Long id,
-            @RequestBody AssetUpdateRequestDTO request) {
+            @Valid @RequestBody AssetUpdateRequestDTO request) {
         return ResponseEntity.ok(assetService.updateAsset(id, request));
     }
 
@@ -88,5 +88,19 @@ public class AssetController {
     @GetMapping("/spare-laptop")
     public ResponseEntity<SpareLaptopResponseDTO> findSpareLaptop() {
         return ResponseEntity.ok(assetService.findSpareLaptop());
+    }
+
+    // ADMIN + MANAGER: mark an asset as IN_REPAIR
+    @PatchMapping("/{id}/mark-in-repair")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<AssetResponseDTO> markInRepair(@PathVariable Long id) {
+        return ResponseEntity.ok(assetService.setRepairStatus(id, true));
+    }
+
+    // ADMIN + MANAGER: return an asset from repair back to AVAILABLE
+    @PatchMapping("/{id}/mark-repaired")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<AssetResponseDTO> markRepaired(@PathVariable Long id) {
+        return ResponseEntity.ok(assetService.setRepairStatus(id, false));
     }
 }

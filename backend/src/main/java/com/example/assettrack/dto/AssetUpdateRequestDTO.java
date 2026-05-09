@@ -2,14 +2,24 @@ package com.example.assettrack.dto;
 
 import com.example.assettrack.domain.AssetStatus;
 import com.example.assettrack.domain.AssetType;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 
+/**
+ * All fields are optional — only non-null values are applied.
+ * String fields, when provided, must not be blank.
+ */
 public class AssetUpdateRequestDTO {
 
     private AssetType type;
+
+    @NotBlank(message = "Brand must not be blank when provided")
     private String brand;
+
+    @NotBlank(message = "Model must not be blank when provided")
     private String model;
+
     private LocalDate purchaseDate;
     private LocalDate warrantyExpiry;
     private AssetStatus status;

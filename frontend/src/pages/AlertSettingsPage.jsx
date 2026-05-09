@@ -91,11 +91,49 @@ export default function AlertSettingsPage() {
     const { alertSettings, saveAlertSettings } = useNotifications();
     const [settings, setSettings] = useState({ ...alertSettings });
     const [saved, setSaved] = useState(false);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const handleSave = () => {
-        saveAlertSettings(settings);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2500);
+    // Load persisted settings from the backend on mount
+    useEffect(() => {
+        (async () => {
+            try {
+                const { data } = await api.get('/alert-settings');
+                const merged = {
+                    warrantyExpiryDays: data.warrantyExpiryDays ?? alertSettings.warrantyExpiryDays,
+                    showExpiredAlerts: data.showExpiredAlerts ?? alertSettings.showExpiredAlerts,
+                    showMaintenanceAlerts: data.showMaintenanceAlerts ?? alertSettings.showMaintenanceAlerts,
+                };
+                setSettings(merged);
+                saveAlertSettings(merged);
+            } catch {
+                // If the user is not ADMIN the endpoint returns 403 — fall back to local defaults silently
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleSave = async () => {
+        setError(null);
+        try {
+            const { data } = await api.put('/alert-settings', {
+                warrantyExpiryDays: settings.warrantyExpiryDays,
+                showExpiredAlerts: settings.showExpiredAlerts,
+                showMaintenanceAlerts: settings.showMaintenanceAlerts,
+            });
+            const merged = {
+                warrantyExpiryDays: data.warrantyExpiryDays,
+                showExpiredAlerts: data.showExpiredAlerts,
+                showMaintenanceAlerts: data.showMaintenanceAlerts,
+            };
+            setSettings(merged);
+            saveAlertSettings(merged);
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2500);
+        } catch (e) {
+            setError(e.response?.data?.message ?? 'Failed to save settings.');
+        }
     };
 
     const toggle = (key) => setSettings(s => ({ ...s, [key]: !s[key] }));
@@ -114,6 +152,17 @@ export default function AlertSettingsPage() {
                         ✓ Settings saved successfully.
                     </div>
                 )}
+
+                {error && (
+                    <div className="alert alert-error" style={{ marginBottom: '20px' }}>
+                        {error}
+                    </div>
+                )}
+
+                {loading ? (
+                    <div className="spinner-wrap"><div className="spinner" /></div>
+                ) : (
+                <>
 
                 {/* Live notification panel */}
                 <NotificationPanel />
@@ -178,6 +227,9 @@ export default function AlertSettingsPage() {
                 <button className="btn btn-primary" onClick={handleSave}>
                     Save Settings
                 </button>
+
+                </>
+                )}
             </div>
         </>
     );
