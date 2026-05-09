@@ -99,13 +99,15 @@ public class AssetService {
         AssetStatus status,
         AssetType type,
         String brand,
-        Boolean assignedToEnabled
+        Boolean assignedToEnabled,
+        String assignedUser
     ) {
         refreshExpiredLaptops();
         Specification<Asset> spec = (root, query, cb) -> cb.conjunction();
 
         if (serialNumber != null && !serialNumber.isBlank()) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("serialNumber"), serialNumber));
+            spec = spec.and((root, query, cb) ->
+                cb.like(cb.lower(root.get("serialNumber")), "%" + serialNumber.toLowerCase() + "%"));
         }
         if (status != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
@@ -120,6 +122,12 @@ public class AssetService {
             spec = spec.and((root, query, cb) -> {
                 var join = root.join("currentOwner", JoinType.LEFT);
                 return cb.equal(join.get("enabled"), assignedToEnabled);
+            });
+        }
+        if (assignedUser != null && !assignedUser.isBlank()) {
+            spec = spec.and((root, query, cb) -> {
+                var join = root.join("currentOwner", JoinType.LEFT);
+                return cb.like(cb.lower(join.get("email")), "%" + assignedUser.toLowerCase() + "%");
             });
         }
 

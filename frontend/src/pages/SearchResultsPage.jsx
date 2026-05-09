@@ -102,7 +102,7 @@ export default function SearchResultsPage() {
                                             <td>{a.model ?? '—'}</td>
                                             <td>{a.serialNumber ?? '—'}</td>
                                             <td>{statusBadge(a.status)}</td>
-                                            <td>{a.assignedTo?.email ?? a.assignedTo ?? '—'}</td>
+                                            <td>{a.currentOwnerEmail ?? '—'}</td>
                                         </tr>
                                     ))}
                                     </tbody>

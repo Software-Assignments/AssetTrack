@@ -4,56 +4,6 @@ import { useAuth } from './AuthContext';
 
 const NotificationContext = createContext(null);
 
-// Mock alert generation based on asset data
-function generateAlertsFromAssets(assets) {
-    const alerts = [];
-    const now = new Date();
-
-    assets.forEach(asset => {
-        // Expiry / warranty warnings
-        if (asset.warrantyExpiry) {
-            const expiry = new Date(asset.warrantyExpiry);
-            const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-            if (daysLeft <= 0) {
-                alerts.push({
-                    id: `warranty-expired-${asset.id}`,
-                    type: 'error',
-                    title: 'Warranty Expired',
-                    message: `${asset.brand} ${asset.model} (${asset.serialNumber}) warranty has expired.`,
-                    assetId: asset.id,
-                    timestamp: new Date().toISOString(),
-                    read: false,
-                });
-            } else if (daysLeft <= 30) {
-                alerts.push({
-                    id: `warranty-expiring-${asset.id}`,
-                    type: 'warning',
-                    title: 'Warranty Expiring Soon',
-                    message: `${asset.brand} ${asset.model} warranty expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}.`,
-                    assetId: asset.id,
-                    timestamp: new Date().toISOString(),
-                    read: false,
-                });
-            }
-        }
-
-        // Retired/maintenance status alerts
-        if (asset.status === 'IN_REPAIR') {
-            alerts.push({
-                id: `maintenance-${asset.id}`,
-                type: 'info',
-                title: 'Asset in Maintenance',
-                message: `${asset.brand} ${asset.model} (${asset.serialNumber}) is currently under maintenance.`,
-                assetId: asset.id,
-                timestamp: new Date().toISOString(),
-                read: false,
-            });
-        }
-    });
-
-    return alerts;
-}
-
 export function NotificationProvider({ children }) {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
@@ -66,41 +16,63 @@ export function NotificationProvider({ children }) {
         };
     });
 
-    const fetchAndGenerateAlerts = useCallback(async () => {
-        if (!user || (user.role !== 'ADMIN' && user.role !== 'MANAGER')) return;
+    const fetchNotifications = useCallback(async () => {
+        if (!user) return;
         try {
-            const { data } = await api.get('/assets');
-            const assets = Array.isArray(data) ? data : (data.content ?? []);
-            const generated = generateAlertsFromAssets(assets);
-
-            setNotifications(prev => {
-                // Merge: keep read state for existing notifications, add new ones
-                const readSet = new Set(prev.filter(n => n.read).map(n => n.id));
-                return generated.map(n => ({ ...n, read: readSet.has(n.id) }));
-            });
+            const endpoint =
+                user.role === 'ADMIN' || user.role === 'MANAGER'
+                    ? '/notifications/all'
+                    : '/notifications';
+            const { data } = await api.get(endpoint);
+            const list = Array.isArray(data) ? data : [];
+            setNotifications(
+                list.map(n => ({
+                    id: n.id,
+                    type: n.type,
+                    title: (n.type ?? '').replace(/_/g, ' '),
+                    message: n.message,
+                    assetId: n.assetId,
+                    timestamp: n.createdAt,
+                    read: n.read ?? false,
+                    resolved: n.resolved ?? false,
+                }))
+            );
         } catch {
-            // If API fails, don't clear existing notifications
+            // Network error — keep existing notifications
         }
-    }, []);
+    }, [user]);
 
-    // Poll every 30 seconds for real-time updates
     useEffect(() => {
-        fetchAndGenerateAlerts();
-        const interval = setInterval(fetchAndGenerateAlerts, 30000);
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 30000);
         return () => clearInterval(interval);
-    }, [fetchAndGenerateAlerts]);
+    }, [fetchNotifications]);
 
-    const markAsRead = useCallback((id) => {
+    const markAsRead = useCallback(async (id) => {
+        try {
+            await api.put(`/notifications/${id}/read`);
+        } catch { /* optimistic */ }
         setNotifications(prev =>
             prev.map(n => n.id === id ? { ...n, read: true } : n)
         );
     }, []);
 
-    const markAllAsRead = useCallback(() => {
+    const markAllAsRead = useCallback(async () => {
+        const unread = notifications.filter(n => !n.read);
+        await Promise.allSettled(unread.map(n => api.put(`/notifications/${n.id}/read`)));
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    }, [notifications]);
+
+    const resolveNotification = useCallback(async (id) => {
+        try {
+            await api.put(`/notifications/${id}/resolve`);
+            setNotifications(prev =>
+                prev.map(n => n.id === id ? { ...n, resolved: true, read: true } : n)
+            );
+        } catch { /* silent */ }
     }, []);
 
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const unreadCount = notifications.filter(n => !n.read && !n.resolved).length;
 
     const saveAlertSettings = useCallback((settings) => {
         setAlertSettings(settings);
@@ -113,9 +85,10 @@ export function NotificationProvider({ children }) {
             unreadCount,
             markAsRead,
             markAllAsRead,
+            resolveNotification,
             alertSettings,
             saveAlertSettings,
-            refresh: fetchAndGenerateAlerts,
+            refresh: fetchNotifications,
         }}>
             {children}
         </NotificationContext.Provider>

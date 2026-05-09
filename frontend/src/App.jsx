@@ -23,6 +23,7 @@ import ConditionReportsListPage from './pages/ConditionReportsListPage';
 import DashboardPage from './pages/DashboardPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import AlertSettingsPage from './pages/AlertSettingsPage';
+import UserManagementPage from './pages/UserManagementPage';
 
 export default function App() {
   return (
@@ -58,6 +59,9 @@ export default function App() {
 
               {/* Alert Settings (Member 5) */}
               <Route path="/alert-settings" element={<AlertSettingsPage />} />
+
+              {/* User Management */}
+              <Route path="/users" element={<UserManagementPage />} />
             </Route>
 
             {/* Default redirect */}

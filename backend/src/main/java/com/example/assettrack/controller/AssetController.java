@@ -61,17 +61,18 @@ public class AssetController {
     }
 
     // Advanced search: any combination of serial, status, type, brand,
-    // owner-enabled flag
+    // owner-enabled flag, assignedUser email
     @GetMapping("/search")
-    // @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'DEVELOPER')")
     public ResponseEntity<List<AssetResponseDTO>> searchAssets(
             @RequestParam(required = false) String serialNumber,
             @RequestParam(required = false) AssetStatus status,
             @RequestParam(required = false) AssetType type,
             @RequestParam(required = false) String brand,
-            @RequestParam(required = false) Boolean assignedToEnabled) {
+            @RequestParam(required = false) Boolean assignedToEnabled,
+            @RequestParam(required = false) String assignedUser) {
         return ResponseEntity.ok(
-                assetService.searchAssets(serialNumber, status, type, brand, assignedToEnabled));
+                assetService.searchAssets(serialNumber, status, type, brand, assignedToEnabled, assignedUser));
     }
 
     // Expiration tracking: assets whose warranty expires within the configured
