@@ -3,12 +3,15 @@ package com.example.assettrack.controller;
 import com.example.assettrack.dto.AllocationRequestDTO;
 import com.example.assettrack.dto.AssetResponseDTO;
 import com.example.assettrack.dto.ReturnRequestDTO;
+import com.example.assettrack.dto.response.AllocationHistoryDTO;
 import com.example.assettrack.service.AllocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/assets/{assetId}")
@@ -41,5 +44,14 @@ public class AllocationController {
             @PathVariable Long assetId,
             @RequestBody ReturnRequestDTO request) {
         return ResponseEntity.ok(allocationService.returnAsset(assetId, request));
+    }
+
+    /**
+     * Get the full allocation history for an asset.
+     * Any authenticated user can view.
+     */
+    @GetMapping("/allocation-history")
+    public ResponseEntity<List<AllocationHistoryDTO>> getAllocationHistory(@PathVariable Long assetId) {
+        return ResponseEntity.ok(allocationService.getAllocationHistory(assetId));
     }
 }

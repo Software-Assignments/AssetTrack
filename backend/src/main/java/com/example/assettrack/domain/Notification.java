@@ -49,5 +49,7 @@ public class Notification {
 
     @Column(nullable = false)
     private boolean resolved;
-}
 
+    @Column(name = "is_read", nullable = false)
+    private boolean read;
+}

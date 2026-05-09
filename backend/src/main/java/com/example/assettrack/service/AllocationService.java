@@ -3,6 +3,7 @@ package com.example.assettrack.service;
 import com.example.assettrack.dto.AllocationRequestDTO;
 import com.example.assettrack.dto.AssetResponseDTO;
 import com.example.assettrack.dto.ReturnRequestDTO;
+import com.example.assettrack.dto.response.AllocationHistoryDTO;
 import com.example.assettrack.domain.AllocationHistory;
 import com.example.assettrack.domain.Asset;
 import com.example.assettrack.domain.AssetStatus;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AllocationService {
@@ -84,5 +87,25 @@ public class AllocationService {
         asset.setStatus(AssetStatus.AVAILABLE);
 
         return assetService.getAsset(asset.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AllocationHistoryDTO> getAllocationHistory(Long assetId) {
+        Asset asset = assetService.getAssetEntity(assetId);
+        List<AllocationHistory> history = allocationHistoryRepository.findByAssetOrderByAssignDateDesc(asset);
+        return history.stream().map(this::toHistoryDto).collect(Collectors.toList());
+    }
+
+    private AllocationHistoryDTO toHistoryDto(AllocationHistory a) {
+        return AllocationHistoryDTO.builder()
+                .id(a.getId())
+                .assetId(a.getAsset().getId())
+                .assetSerialNumber(a.getAsset().getSerialNumber())
+                .userId(a.getAssignedUser().getId())
+                .userEmail(a.getAssignedUser().getEmail())
+                .userFullName(a.getAssignedUser().getFullName())
+                .assignDate(a.getAssignDate())
+                .returnDate(a.getReturnDate())
+                .build();
     }
 }

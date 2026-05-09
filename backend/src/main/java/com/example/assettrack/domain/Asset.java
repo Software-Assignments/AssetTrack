@@ -1,5 +1,6 @@
 package com.example.assettrack.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -48,12 +49,15 @@ public class Asset {
     @JoinColumn(name = "current_owner_id")
     private User currentOwner;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AllocationHistory> allocationHistory = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConditionReport> conditionReports = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications = new ArrayList<>();
 }
