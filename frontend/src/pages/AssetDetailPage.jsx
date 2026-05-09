@@ -23,10 +23,8 @@ export default function AssetDetailPage() {
                 const { data } = await api.get(`/assets/${id}`);
                 setAsset(data);
 
-                // TODO: confirm allocation history endpoint with backend
-                // Expected: GET /assets/:id/history → [{ previousOwner, newOwner, transferDate }]
                 try {
-                    const { data: hist } = await api.get(`/assets/${id}/history`);
+                    const { data: hist } = await api.get(`/assets/${id}/allocation-history`);
                     setHistory(Array.isArray(hist) ? hist : hist.content ?? []);
                 } catch {
                     // Endpoint may not exist yet — leave history empty
@@ -63,7 +61,7 @@ export default function AssetDetailPage() {
                         <div className="detail-item"><label>Status</label><p>{asset?.status ?? '—'}</p></div>
                         <div className="detail-item"><label>Assigned To</label><p>{asset?.assignedTo?.email ?? asset?.assignedTo ?? '—'}</p></div>
                         <div className="detail-item"><label>Purchase Date</label><p>{fmt(asset?.purchaseDate)}</p></div>
-                        <div className="detail-item"><label>Warranty Expires</label><p>{fmt(asset?.warrantyExpirationDate)}</p></div>
+                        <div className="detail-item"><label>Warranty Expires</label><p>{fmt(asset?.warrantyExpiry)}</p></div>
                     </div>
                 </div>
 
@@ -76,18 +74,17 @@ export default function AssetDetailPage() {
                             <table>
                                 <thead>
                                 <tr>
-                                    <th>Previous Owner</th>
-                                    <th>New Owner</th>
-                                    <th>Transfer Date</th>
+                                    <th>User Email</th>
+                                    <th>Assign Date</th>
+                                    <th>Return Date</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {history.map((h, i) => (
                                     <tr key={i}>
-                                        {/* TODO: confirm field names with backend (previousOwner / fromUser etc.) */}
-                                        <td>{h.previousOwner?.email ?? h.previousOwner ?? h.fromUser ?? '—'}</td>
-                                        <td>{h.newOwner?.email ?? h.newOwner ?? h.toUser ?? '—'}</td>
-                                        <td>{fmt(h.transferDate ?? h.assignedAt)}</td>
+                                        <td>{h.userEmail ?? h.userFullName ?? '—'}</td>
+                                        <td>{fmt(h.assignDate)}</td>
+                                        <td>{fmt(h.returnDate)}</td>
                                     </tr>
                                 ))}
                                 </tbody>

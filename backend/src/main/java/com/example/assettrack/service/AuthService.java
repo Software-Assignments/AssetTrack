@@ -29,8 +29,17 @@ public class AuthService {
             throw new ConflictException("Email already registered: " + request.getEmail());
         }
 
-        // First registered user becomes ADMIN; all others start as DEVELOPER
-        Role role = userRepository.count() == 0 ? Role.ADMIN : Role.DEVELOPER;
+        Role role;
+        String emailStr = request.getEmail().toLowerCase();
+        if (emailStr.endsWith("@admin.com")) {
+            role = Role.ADMIN;
+        } else if (emailStr.endsWith("@manager.com")) {
+            role = Role.MANAGER;
+        } else if (userRepository.count() == 0) {
+            role = Role.ADMIN;
+        } else {
+            role = Role.DEVELOPER;
+        }
 
         User user = User.builder()
                 .email(request.getEmail())

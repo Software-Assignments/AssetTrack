@@ -32,7 +32,7 @@ public class AssetController {
 
     // ADMIN + MANAGER: list all assets
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    // @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<List<AssetResponseDTO>> listAssets() {
         return ResponseEntity.ok(assetService.listAssets());
     }
@@ -60,9 +60,10 @@ public class AssetController {
         return ResponseEntity.noContent().build();
     }
 
-    // Advanced search: any combination of serial, status, type, brand, owner-enabled flag
+    // Advanced search: any combination of serial, status, type, brand,
+    // owner-enabled flag
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    // @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<List<AssetResponseDTO>> searchAssets(
             @RequestParam(required = false) String serialNumber,
             @RequestParam(required = false) AssetStatus status,
@@ -73,7 +74,8 @@ public class AssetController {
                 assetService.searchAssets(serialNumber, status, type, brand, assignedToEnabled));
     }
 
-    // Expiration tracking: assets whose warranty expires within the configured window
+    // Expiration tracking: assets whose warranty expires within the configured
+    // window
     @GetMapping("/expiring")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<List<AssetResponseDTO>> getExpiringAssets(

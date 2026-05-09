@@ -18,10 +18,14 @@ export default function LoginPage() {
         setError('');
         setLoading(true);
         try {
-            // TODO: confirm response shape with backend — expected: { token, user: { id, email, role } }
             const { data } = await api.post('/auth/login', { email: form.email, password: form.password });
-            login(data.token, data.user);
-            navigate('/assets');
+            const userParams = { email: data.email, fullName: data.fullName, role: data.role };
+            login(data.token, userParams);
+            if (data.role === 'ADMIN' || data.role === 'MANAGER') {
+                navigate('/dashboard');
+            } else {
+                navigate('/assets');
+            }
         } catch (err) {
             setError(err.response?.data?.message ?? 'Invalid email or password.');
         } finally {

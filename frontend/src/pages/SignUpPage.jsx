@@ -4,7 +4,7 @@ import api from '../api/axiosInstance';
 
 export default function SignUpPage() {
     const navigate = useNavigate();
-    const [form, setForm] = useState({ name: '',email: '', password: '', confirm: '' });
+    const [form, setForm] = useState({ fullName: '', email: '', password: '', confirm: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 

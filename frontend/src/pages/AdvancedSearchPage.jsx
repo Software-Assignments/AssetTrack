@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
-// TODO: confirm all query param names with backend
-const STATUS_OPTIONS = ['', 'AVAILABLE', 'ASSIGNED', 'MAINTENANCE', 'RETIRED'];
-const TYPE_OPTIONS   = ['', 'LAPTOP', 'MONITOR', 'ACCESSORY'];
+
+const STATUS_OPTIONS = ['', 'AVAILABLE', 'ASSIGNED', 'IN_REPAIR', 'EXPIRED', 'DECOMMISSIONED'];
+const TYPE_OPTIONS   = ['', 'LAPTOP', 'SCREEN', 'ACCESSORY'];
 
 const EMPTY = { serialNumber: '', assignedUser: '', status: '', type: '', brand: '' };
 
@@ -42,7 +42,7 @@ export default function AdvancedSearchPage() {
                         </div>
                         <div className="form-group">
                             <label>Assigned User</label>
-                            {/* TODO: could be upgraded to a user-picker dropdown once GET /users is available */}
+
                             <input type="text" value={filters.assignedUser} onChange={set('assignedUser')} placeholder="User email or name" />
                         </div>
                         <div className="form-group">

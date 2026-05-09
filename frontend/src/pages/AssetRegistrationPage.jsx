@@ -4,12 +4,10 @@ import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
-// TODO: confirm accepted role values with backend
 const ALLOWED_ROLES = ['ADMIN', 'MANAGER'];
-// TODO: confirm asset type values with backend
-const ASSET_TYPES = ['LAPTOP', 'MONITOR', 'ACCESSORY'];
+const ASSET_TYPES = ['LAPTOP', 'SCREEN', 'ACCESSORY'];
 
-const EMPTY = { type: '', brand: '', model: '', serialNumber: '', purchaseDate: '', warrantyExpirationDate: '' };
+const EMPTY = { type: '', brand: '', model: '', serialNumber: '', purchaseDate: '', warrantyExpiry: '' };
 
 export default function AssetRegistrationPage() {
     const { user } = useAuth();
@@ -35,8 +33,8 @@ export default function AssetRegistrationPage() {
     const set = field => e => setForm(f => ({ ...f, [field]: e.target.value }));
 
     const validate = () => {
-        const { type, brand, model, serialNumber, purchaseDate, warrantyExpirationDate } = form;
-        if (!type || !brand || !model || !serialNumber || !purchaseDate || !warrantyExpirationDate)
+        const { type, brand, model, serialNumber, purchaseDate, warrantyExpiry } = form;
+        if (!type || !brand || !model || !serialNumber || !purchaseDate || !warrantyExpiry)
             return 'All fields are required.';
         return null;
     };
@@ -48,7 +46,6 @@ export default function AssetRegistrationPage() {
         setError(''); setSuccess('');
         setLoading(true);
         try {
-            // TODO: confirm POST /assets request body shape with backend team
             await api.post('/assets', form);
             setSuccess('Asset registered successfully!');
             setTimeout(() => navigate('/assets'), 1500);
@@ -98,7 +95,7 @@ export default function AssetRegistrationPage() {
                         </div>
                         <div className="form-group" style={{ marginBottom: 20 }}>
                             <label>Warranty Expiration Date <span className="required">*</span></label>
-                            <input type="date" value={form.warrantyExpirationDate} onChange={set('warrantyExpirationDate')} />
+                            <input type="date" value={form.warrantyExpiry} onChange={set('warrantyExpiry')} />
                         </div>
                         <button className="btn btn-primary" type="submit" disabled={loading}>
                             {loading ? 'Registering…' : 'Register Asset'}

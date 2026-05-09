@@ -19,7 +19,6 @@ export default function AssignTransferPage() {
             try {
                 const [aRes, uRes] = await Promise.all([
                     api.get('/assets'),
-                    // TODO: confirm GET /users endpoint exists and is accessible
                     api.get('/users'),
                 ]);
                 setAssets(Array.isArray(aRes.data) ? aRes.data : aRes.data.content ?? []);
@@ -37,8 +36,7 @@ export default function AssignTransferPage() {
         setError(''); setSuccess('');
         setLoading(true);
         try {
-            // TODO: confirm assign endpoint with backend — may be POST /allocations or PUT /assets/:id/assign
-            await api.post('/allocations', { assetId, userId });
+            await api.post(`/assets/${assetId}/allocate`, { userId, transfer: false });
             setSuccess('Asset assigned successfully!');
             setTimeout(() => navigate(`/assets/${assetId}`), 1500);
         } catch (err) {
@@ -76,7 +74,6 @@ export default function AssignTransferPage() {
                         </div>
                         <div className="form-group" style={{ marginBottom: 20 }}>
                             <label>Assign To <span className="required">*</span></label>
-                            {/* TODO: GET /users endpoint must be implemented by backend */}
                             <select value={userId} onChange={e => setUserId(e.target.value)}>
                                 <option value="">Select user…</option>
                                 {users.map(u => (

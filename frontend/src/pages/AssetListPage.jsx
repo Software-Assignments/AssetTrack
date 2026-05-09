@@ -4,17 +4,17 @@ import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 import SearchBar from '../components/SearchBar';
 
-const STATUS_OPTIONS = ['', 'AVAILABLE', 'ASSIGNED', 'MAINTENANCE', 'RETIRED'];
-const TYPE_OPTIONS   = ['', 'LAPTOP', 'MONITOR', 'ACCESSORY'];
+const STATUS_OPTIONS = ['', 'AVAILABLE', 'ASSIGNED', 'IN_REPAIR', 'EXPIRED', 'DECOMMISSIONED'];
+const TYPE_OPTIONS   = ['', 'LAPTOP', 'SCREEN', 'ACCESSORY'];
 
 function statusBadge(s) {
-    const map = { AVAILABLE: 'badge-available', ASSIGNED: 'badge-assigned', MAINTENANCE: 'badge-maintenance', RETIRED: 'badge-retired' };
+    const map = { AVAILABLE: 'badge-available', ASSIGNED: 'badge-assigned', IN_REPAIR: 'badge-maintenance', EXPIRED: 'badge-expired', DECOMMISSIONED: 'badge-retired' };
     return <span className={`badge ${map[s] ?? ''}`}>{s ?? '—'}</span>;
 }
 
-function ExpiryIndicator({ warrantyExpirationDate }) {
-    if (!warrantyExpirationDate) return null;
-    const daysLeft = Math.ceil((new Date(warrantyExpirationDate) - Date.now()) / 86400000);
+function ExpiryIndicator({ warrantyExpiry }) {
+    if (!warrantyExpiry) return null;
+    const daysLeft = Math.ceil((new Date(warrantyExpiry) - Date.now()) / 86400000);
     if (daysLeft > 30) return null;
     const isExpired = daysLeft <= 0;
     return (
@@ -48,10 +48,10 @@ export default function AssetListPage() {
         setLoading(true); setError('');
         try {
             const params = {};
-            if (search) params.search = search;
+            if (search) params.serialNumber = search;
             if (type)   params.type   = type;
             if (status) params.status = status;
-            const { data } = await api.get('/assets', { params });
+            const { data } = await api.get('/assets/search', { params });
             setAssets(Array.isArray(data) ? data : data.content ?? []);
         } catch {
             setError('Failed to load assets.');
@@ -67,10 +67,9 @@ export default function AssetListPage() {
     const findSpare = async () => {
         setSpareLoading(true); setSpare(null); setSpareMsg('');
         try {
-            const { data } = await api.get('/assets', { params: { type: 'LAPTOP', status: 'AVAILABLE' } });
-            const list = Array.isArray(data) ? data : data.content ?? [];
-            if (list.length === 0) { setSpareMsg('No spare laptops available.'); }
-            else { setSpare(list[0]); }
+            const { data } = await api.get('/assets/spare-laptop');
+            if (!data || Object.keys(data).length === 0) { setSpareMsg('No spare laptops available.'); }
+            else { setSpare(data); }
         } catch {
             setSpareMsg('Could not retrieve spare laptops.');
         } finally {
@@ -79,9 +78,11 @@ export default function AssetListPage() {
     };
 
     const expiringCount = assets.filter(a => {
-        if (!a.warrantyExpirationDate) return false;
-        return Math.ceil((new Date(a.warrantyExpirationDate) - Date.now()) / 86400000) <= 30;
+        if (!a.warrantyExpiry) return false;
+        return Math.ceil((new Date(a.warrantyExpiry) - Date.now()) / 86400000) <= 30;
     }).length;
+
+
 
     return (
         <>
@@ -154,8 +155,8 @@ export default function AssetListPage() {
                                 </thead>
                                 <tbody>
                                     {assets.map(a => {
-                                        const daysLeft = a.warrantyExpirationDate
-                                            ? Math.ceil((new Date(a.warrantyExpirationDate) - Date.now()) / 86400000)
+                                        const daysLeft = a.warrantyExpiry
+                                            ? Math.ceil((new Date(a.warrantyExpiry) - Date.now()) / 86400000)
                                             : null;
                                         const isExpired = daysLeft !== null && daysLeft <= 0;
                                         const isExpiring = daysLeft !== null && daysLeft > 0 && daysLeft <= 30;
@@ -171,14 +172,14 @@ export default function AssetListPage() {
                                                 <td>{a.type ?? '—'}</td>
                                                 <td>
                                                     <strong>{a.brand} {a.model}</strong>
-                                                    <ExpiryIndicator warrantyExpirationDate={a.warrantyExpirationDate} />
+                                                    <ExpiryIndicator warrantyExpiry={a.warrantyExpiry} />
                                                 </td>
                                                 <td>{a.serialNumber ?? '—'}</td>
                                                 <td>{statusBadge(a.status)}</td>
                                                 <td>{a.assignedTo?.email ?? a.assignedTo ?? '—'}</td>
                                                 <td style={{ fontSize: '12px', color: isExpired ? '#DC2626' : isExpiring ? '#D97706' : 'var(--text-muted)' }}>
-                                                    {a.warrantyExpirationDate
-                                                        ? new Date(a.warrantyExpirationDate).toLocaleDateString()
+                                                    {a.warrantyExpiry
+                                                        ? new Date(a.warrantyExpiry).toLocaleDateString()
                                                         : '—'}
                                                 </td>
                                             </tr>

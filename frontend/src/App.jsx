@@ -1,7 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import ProtectedRoute from './components/ProtectedRoute';
+
+function RootRedirect() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" />;
+  if (user.role === 'ADMIN' || user.role === 'MANAGER') return <Navigate to="/dashboard" />;
+  return <Navigate to="/assets" />;
+}
 
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
@@ -54,7 +61,8 @@ export default function App() {
             </Route>
 
             {/* Default redirect */}
-            <Route path="*" element={<Navigate to="/dashboard" />} />
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="*" element={<RootRedirect />} />
           </Routes>
         </NotificationProvider>
       </BrowserRouter>

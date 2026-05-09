@@ -14,7 +14,7 @@ const NAV_ITEMS = [
         label: 'Assets',
         path: '/assets',
         icon: 'box',
-        roles: ['ADMIN', 'MANAGER', 'USER'],
+        roles: ['ADMIN', 'MANAGER', 'DEVELOPER'],
     },
     {
         label: 'Register Asset',
@@ -38,13 +38,19 @@ const NAV_ITEMS = [
         label: 'Condition Reports',
         path: '/condition-reports',
         icon: 'file-text',
-        roles: ['ADMIN', 'MANAGER', 'USER'],
+        roles: ['ADMIN', 'MANAGER'],
+    },
+    {
+        label: 'Report Issue',
+        path: '/condition-report',
+        icon: 'file-text',
+        roles: ['ADMIN', 'MANAGER', 'DEVELOPER'],
     },
     {
         label: 'Search',
         path: '/search',
         icon: 'search',
-        roles: ['ADMIN', 'MANAGER', 'USER'],
+        roles: ['ADMIN', 'MANAGER', 'DEVELOPER'],
     },
     {
         label: 'Alert Settings',
@@ -80,6 +86,10 @@ export default function Navbar() {
 
     const userRole = user?.role ?? 'USER';
     const handleLogout = () => { logout(); navigate('/login'); };
+    const handleBrandClick = () => {
+        if (userRole === 'ADMIN' || userRole === 'MANAGER') navigate('/dashboard');
+        else navigate('/assets');
+    };
     const visibleItems = NAV_ITEMS.filter(item => item.roles.includes(userRole));
 
     const roleBadge = { ADMIN: { bg: '#FEE2E2', color: '#DC2626' }, MANAGER: { bg: '#FEF3C7', color: '#D97706' }, USER: { bg: '#DBEAFE', color: '#1D4ED8' } };
@@ -92,7 +102,7 @@ export default function Navbar() {
                     <button onClick={() => setSidebarOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }} title="Toggle menu">
                         <Icon name="menu" />
                     </button>
-                    <span className="navbar-brand" style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>AssetTrack</span>
+                    <span className="navbar-brand" style={{ cursor: 'pointer' }} onClick={handleBrandClick}>AssetTrack</span>
                 </div>
                 <div className="navbar-right">
                     <NotificationBell />

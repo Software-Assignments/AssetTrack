@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import api from '../api/axiosInstance';
+import { useAuth } from './AuthContext';
 
 const NotificationContext = createContext(null);
 
@@ -10,8 +11,8 @@ function generateAlertsFromAssets(assets) {
 
     assets.forEach(asset => {
         // Expiry / warranty warnings
-        if (asset.warrantyExpirationDate) {
-            const expiry = new Date(asset.warrantyExpirationDate);
+        if (asset.warrantyExpiry) {
+            const expiry = new Date(asset.warrantyExpiry);
             const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
             if (daysLeft <= 0) {
                 alerts.push({
@@ -37,7 +38,7 @@ function generateAlertsFromAssets(assets) {
         }
 
         // Retired/maintenance status alerts
-        if (asset.status === 'MAINTENANCE') {
+        if (asset.status === 'IN_REPAIR') {
             alerts.push({
                 id: `maintenance-${asset.id}`,
                 type: 'info',
@@ -54,6 +55,7 @@ function generateAlertsFromAssets(assets) {
 }
 
 export function NotificationProvider({ children }) {
+    const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [alertSettings, setAlertSettings] = useState(() => {
         const saved = localStorage.getItem('alertSettings');
@@ -65,6 +67,7 @@ export function NotificationProvider({ children }) {
     });
 
     const fetchAndGenerateAlerts = useCallback(async () => {
+        if (!user || (user.role !== 'ADMIN' && user.role !== 'MANAGER')) return;
         try {
             const { data } = await api.get('/assets');
             const assets = Array.isArray(data) ? data : (data.content ?? []);

@@ -4,8 +4,7 @@ import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
-// TODO: confirm severity values with backend team
-const SEVERITY_OPTIONS = ['LOW', 'MEDIUM', 'HIGH'];
+const SEVERITY_OPTIONS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
 const EMPTY = { assetId: '', description: '', severity: 'LOW' };
 
@@ -25,10 +24,9 @@ export default function ConditionReportPage() {
             setAssetsLoading(true);
             setAssetsError('');
             try {
-                // TODO: confirm assigned-assets filter param with backend (?assignedTo=<userId> or similar)
                 const params = {};
                 if (user?.id) params.assignedTo = user.id;
-                const { data } = await api.get('/assets', { params });
+                const { data } = await api.get('/assets/search', { params });
                 setAssets(Array.isArray(data) ? data : data.content ?? []);
             } catch {
                 setAssetsError('Could not load your assigned assets.');
@@ -54,12 +52,10 @@ export default function ConditionReportPage() {
         setError(''); setSuccess('');
         setLoading(true);
         try {
-            // TODO: confirm POST /condition-reports request body shape with backend team
-            await api.post('/condition-reports', {
+            await api.post('/reports', {
                 assetId: form.assetId,
-                description: form.description,
+                issueDescription: form.description,
                 severity: form.severity,
-                // reportedBy is inferred from JWT on the backend
             });
             setSuccess('Condition report submitted successfully!');
             setForm(EMPTY);
@@ -109,7 +105,6 @@ export default function ConditionReportPage() {
 
                         <div className="form-group">
                             <label>Severity <span className="required">*</span></label>
-                            {/* TODO: remove severity field if backend doesn't support it */}
                             <select value={form.severity} onChange={set('severity')}>
                                 {SEVERITY_OPTIONS.map(s => (
                                     <option key={s} value={s}>{s}</option>

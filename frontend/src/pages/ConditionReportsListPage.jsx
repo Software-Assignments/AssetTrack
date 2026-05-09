@@ -4,7 +4,6 @@ import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
-// TODO: confirm accepted role values with backend
 const ALLOWED_ROLES = ['ADMIN', 'MANAGER'];
 
 function fmt(dateStr) {
@@ -52,9 +51,7 @@ export default function ConditionReportsListPage() {
             setLoading(true);
             setError('');
             try {
-                // TODO: confirm response shape of GET /condition-reports with backend team
-                // Expected: [{ id, asset: { id, brand, model, serialNumber }, reportedBy: { email }, date, description, severity }]
-                const { data } = await api.get('/condition-reports');
+                const { data } = await api.get('/reports');
                 setReports(Array.isArray(data) ? data : data.content ?? []);
             } catch {
                 setError('Failed to load condition reports.');
@@ -101,16 +98,13 @@ export default function ConditionReportsListPage() {
                                         onClick={() => r.asset?.id && navigate(`/assets/${r.asset.id}`)}
                                         title={r.asset?.id ? 'View asset details' : undefined}
                                     >
-                                        {/* TODO: confirm field names with backend (asset.brand, asset.model, etc.) */}
                                         <td>
-                                            {r.asset
-                                                ? `${r.asset.brand ?? ''} ${r.asset.model ?? ''}`.trim() || '—'
-                                                : r.assetId ?? '—'}
+                                            {`${r.assetBrand ?? ''} ${r.assetModel ?? ''}`.trim() || r.assetId || '—'}
                                         </td>
-                                        <td>{r.asset?.serialNumber ?? '—'}</td>
-                                        <td>{r.reportedBy?.email ?? r.reportedBy ?? '—'}</td>
-                                        <td>{fmt(r.date ?? r.createdAt ?? r.reportedAt)}</td>
-                                        <td>{severityBadge(r.severity)}</td>
+                                        <td>{r.assetSerialNumber ?? '—'}</td>
+                                        <td>{r.reportedByEmail ?? r.reportedByName ?? '—'}</td>
+                                        <td>{fmt(r.reportedAt)}</td>
+                                        <td>{severityBadge(r.conditionStatus)}</td>
                                         <td style={{ maxWidth: 300 }}>
                                                 <span style={{
                                                     display: '-webkit-box',
@@ -118,7 +112,7 @@ export default function ConditionReportsListPage() {
                                                     WebkitBoxOrient: 'vertical',
                                                     overflow: 'hidden',
                                                 }}>
-                                                    {r.description ?? '—'}
+                                                    {r.notes ?? '—'}
                                                 </span>
                                         </td>
                                     </tr>

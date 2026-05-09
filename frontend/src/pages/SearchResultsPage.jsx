@@ -5,10 +5,8 @@ import Navbar from '../components/Navbar';
 
 function statusBadge(s) {
     const map = {
-        AVAILABLE: 'badge-available',
-        ASSIGNED: 'badge-assigned',
-        MAINTENANCE: 'badge-maintenance',
-        RETIRED: 'badge-retired',
+        AVAILABLE: 'badge-available', ASSIGNED: 'badge-assigned',
+        IN_REPAIR: 'badge-maintenance', EXPIRED: 'badge-expired', DECOMMISSIONED: 'badge-retired'
     };
     return <span className={`badge ${map[s] ?? ''}`}>{s ?? '—'}</span>;
 }
@@ -30,8 +28,8 @@ export default function SearchResultsPage() {
                 for (const [key, value] of searchParams.entries()) {
                     if (value) params[key] = value;
                 }
-                // TODO: confirm query param names with backend (?serialNumber=, ?assignedUser=, ?status=, ?type=, ?brand=)
-                const { data } = await api.get('/assets', { params });
+
+                const { data } = await api.get('/assets/search', { params });
                 setResults(Array.isArray(data) ? data : data.content ?? []);
             } catch {
                 setError('Failed to load search results.');
@@ -47,6 +45,8 @@ export default function SearchResultsPage() {
     for (const [key, value] of searchParams.entries()) {
         if (value) activeFilters.push(`${key}: ${value}`);
     }
+
+
 
     return (
         <>

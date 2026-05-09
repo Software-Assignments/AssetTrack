@@ -7,12 +7,16 @@ import {
 import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 import { useNotifications } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
+
+const ALLOWED_ROLES = ['ADMIN', 'MANAGER'];
 
 const STATUS_COLORS = {
     AVAILABLE: '#16A34A',
     ASSIGNED: '#2563EB',
-    MAINTENANCE: '#D97706',
-    RETIRED: '#64748B',
+    IN_REPAIR: '#D97706',
+    EXPIRED: '#EF4444',
+    DECOMMISSIONED: '#64748B',
 };
 
 const TYPE_COLORS = ['#2563EB', '#7C3AED', '#DB2777', '#D97706', '#16A34A'];
@@ -86,7 +90,7 @@ function SuggestedAction({ asset }) {
     const daysLeft = expiry ? Math.ceil((expiry - Date.now()) / 86400000) : null;
     const isExpired = daysLeft !== null && daysLeft <= 0;
 
-    if (!isExpired && asset.status !== 'RETIRED') return null;
+    if (!isExpired && asset.status !== 'DECOMMISSIONED') return null;
 
     return (
         <div style={{
@@ -103,7 +107,7 @@ function SuggestedAction({ asset }) {
                     Reassign →
                 </button>
             )}
-            {(isExpired || asset.status === 'RETIRED') && (
+            {(isExpired || asset.status === 'DECOMMISSIONED') && (
                 <button
                     onClick={(e) => { e.stopPropagation(); navigate(`/assets/${asset.id}`); }}
                     style={{ background: '#F1F5F9', border: '1px solid var(--border)', borderRadius: '4px', color: '#64748B', fontSize: '11px', padding: '2px 8px', cursor: 'pointer', fontWeight: 500 }}
@@ -183,6 +187,8 @@ export default function DashboardPage() {
         </>
     );
 
+
+
     return (
         <>
             <Navbar />
@@ -212,7 +218,7 @@ export default function DashboardPage() {
                     <StatCard label="Total Assets" value={total} icon="📦" color="#2563EB" onClick={() => navigate('/assets')} />
                     <StatCard label="Available" value={byStatus.AVAILABLE ?? 0} icon="✅" color="#16A34A" sub={total ? `${Math.round(((byStatus.AVAILABLE ?? 0) / total) * 100)}% of fleet` : ''} onClick={() => navigate('/assets')} />
                     <StatCard label="Assigned" value={byStatus.ASSIGNED ?? 0} icon="👤" color="#2563EB" onClick={() => navigate('/assets')} />
-                    <StatCard label="Maintenance" value={byStatus.MAINTENANCE ?? 0} icon="🔧" color="#D97706" onClick={() => navigate('/assets')} />
+                    <StatCard label="In Repair" value={byStatus.IN_REPAIR ?? 0} icon="🔧" color="#D97706" onClick={() => navigate('/assets')} />
                     <StatCard label="Expiring Soon" value={flaggedAssets.length} icon="⏰" color="#EF4444" sub={flaggedAssets.length > 0 ? 'Action needed' : 'All good'} />
                 </div>
 
