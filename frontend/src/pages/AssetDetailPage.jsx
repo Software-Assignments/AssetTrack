@@ -23,13 +23,11 @@ export default function AssetDetailPage() {
                 const { data } = await api.get(`/assets/${id}`);
                 setAsset(data);
 
-                // TODO: confirm allocation history endpoint with backend
-                // Expected: GET /assets/:id/history → [{ previousOwner, newOwner, transferDate }]
                 try {
-                    const { data: hist } = await api.get(`/assets/${id}/history`);
+                    // Fixed: correct endpoint is /allocation-history
+                    const { data: hist } = await api.get(`/assets/${id}/allocation-history`);
                     setHistory(Array.isArray(hist) ? hist : hist.content ?? []);
                 } catch {
-                    // Endpoint may not exist yet — leave history empty
                     setHistory([]);
                 }
             } catch {
@@ -61,9 +59,11 @@ export default function AssetDetailPage() {
                         <div className="detail-item"><label>Model</label><p>{asset?.model ?? '—'}</p></div>
                         <div className="detail-item"><label>Serial Number</label><p>{asset?.serialNumber ?? '—'}</p></div>
                         <div className="detail-item"><label>Status</label><p>{asset?.status ?? '—'}</p></div>
-                        <div className="detail-item"><label>Assigned To</label><p>{asset?.assignedTo?.email ?? asset?.assignedTo ?? '—'}</p></div>
+                        {/* Fixed: correct field is currentOwnerEmail */}
+                        <div className="detail-item"><label>Assigned To</label><p>{asset?.currentOwnerEmail ?? '—'}</p></div>
                         <div className="detail-item"><label>Purchase Date</label><p>{fmt(asset?.purchaseDate)}</p></div>
-                        <div className="detail-item"><label>Warranty Expires</label><p>{fmt(asset?.warrantyExpirationDate)}</p></div>
+                        {/* Fixed: correct field is warrantyExpiry, not warrantyExpirationDate */}
+                        <div className="detail-item"><label>Warranty Expires</label><p>{fmt(asset?.warrantyExpiry)}</p></div>
                     </div>
                 </div>
 
@@ -76,18 +76,18 @@ export default function AssetDetailPage() {
                             <table>
                                 <thead>
                                 <tr>
-                                    <th>Previous Owner</th>
-                                    <th>New Owner</th>
-                                    <th>Transfer Date</th>
+                                    <th>Assigned User</th>
+                                    <th>Assign Date</th>
+                                    <th>Return Date</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {history.map((h, i) => (
                                     <tr key={i}>
-                                        {/* TODO: confirm field names with backend (previousOwner / fromUser etc.) */}
-                                        <td>{h.previousOwner?.email ?? h.previousOwner ?? h.fromUser ?? '—'}</td>
-                                        <td>{h.newOwner?.email ?? h.newOwner ?? h.toUser ?? '—'}</td>
-                                        <td>{fmt(h.transferDate ?? h.assignedAt)}</td>
+                                        {/* Fixed: correct fields from AllocationHistoryDTO */}
+                                        <td>{h.userFullName ?? h.userEmail ?? '—'}</td>
+                                        <td>{fmt(h.assignDate)}</td>
+                                        <td>{h.returnDate ? fmt(h.returnDate) : 'Currently Assigned'}</td>
                                     </tr>
                                 ))}
                                 </tbody>
