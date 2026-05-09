@@ -6,7 +6,7 @@ import {
 import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 
-const TYPE_COLORS = { LAPTOP: '#2563EB', MONITOR: '#7C3AED', ACCESSORY: '#DB2777' };
+const TYPE_COLORS = { LAPTOP: '#0F766E', MONITOR: '#14B8A6', ACCESSORY: '#0284C7' };
 
 function fmt(d) {
     if (!d) return '—';
@@ -142,9 +142,9 @@ export default function AnalyticsPage() {
                                         <XAxis dataKey="month" fontSize={11} tick={{ fill: '#64748B' }} />
                                         <YAxis fontSize={11} tick={{ fill: '#64748B' }} />
                                         <Tooltip />
-                                        <Bar dataKey="LAPTOP" name="Laptop" stackId="a" fill="#2563EB" radius={[0, 0, 0, 0]} />
-                                        <Bar dataKey="MONITOR" name="Monitor" stackId="a" fill="#7C3AED" />
-                                        <Bar dataKey="ACCESSORY" name="Accessory" stackId="a" fill="#DB2777" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="LAPTOP" name="Laptop" stackId="a" fill="#0F766E" radius={[0, 0, 0, 0]} />
+                                        <Bar dataKey="MONITOR" name="Monitor" stackId="a" fill="#14B8A6" />
+                                        <Bar dataKey="ACCESSORY" name="Accessory" stackId="a" fill="#0284C7" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             )}
@@ -195,7 +195,7 @@ export default function AnalyticsPage() {
                                         <Tooltip />
                                         <Bar dataKey="count" name="Assets" radius={[4, 4, 0, 0]}>
                                             {conditionBarData.map((e, i) => {
-                                                const c = { EXCELLENT: '#16A34A', GOOD: '#2563EB', FAIR: '#D97706', POOR: '#F97316', CRITICAL: '#EF4444' };
+                                                const c = { EXCELLENT: '#059669', GOOD: '#0F766E', FAIR: '#D97706', POOR: '#F97316', CRITICAL: '#E11D48' };
                                                 return <Cell key={i} fill={c[e.cond] ?? '#94A3B8'} />;
                                             })}
                                         </Bar>
@@ -212,7 +212,7 @@ export default function AnalyticsPage() {
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                                     {conditionTimeline.map((a, i) => {
-                                        const COND_COLOR = { EXCELLENT: '#16A34A', GOOD: '#2563EB', FAIR: '#D97706', POOR: '#F97316', CRITICAL: '#EF4444' };
+                                        const COND_COLOR = { EXCELLENT: '#059669', GOOD: '#0F766E', FAIR: '#D97706', POOR: '#F97316', CRITICAL: '#E11D48' };
                                         const color = COND_COLOR[a.condition] ?? '#64748B';
                                         const barWidth = (a.score / 5) * 100;
                                         return (
@@ -276,7 +276,7 @@ export default function AnalyticsPage() {
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         <span style={{ fontWeight: 600, color: 'var(--blue)', minWidth: '40px' }}>{u.days}</span>
                                                         <div style={{ flex: 1, height: '6px', borderRadius: '999px', background: '#F1F5F9', overflow: 'hidden', maxWidth: '100px' }}>
-                                                            <div style={{ width: `${Math.min(100, (u.days / (usageData[0]?.days || 1)) * 100)}%`, height: '100%', background: '#2563EB', borderRadius: '999px' }} />
+                                                            <div style={{ width: `${Math.min(100, (u.days / (usageData[0]?.days || 1)) * 100)}%`, height: '100%', background: '#0F766E', borderRadius: '999px' }} />
                                                         </div>
                                                     </div>
                                                 </td>

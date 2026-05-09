@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext';
+import { Icon } from './Navbar';
 
 const ICON_COLOR = {
     error: '#EF4444',
@@ -182,7 +183,9 @@ export default function NotificationBell() {
                                 color: 'var(--text-muted)',
                                 fontSize: '13px',
                             }}>
-                                <div style={{ fontSize: '28px', marginBottom: '8px' }}>🔔</div>
+                                <div style={{ marginBottom: '12px', color: 'var(--text-muted)' }}>
+                                    <Icon name="bell" size={32} />
+                                </div>
                                 No notifications
                             </div>
                         ) : (
@@ -275,7 +278,9 @@ export default function NotificationBell() {
                                 fontWeight: 500,
                             }}
                         >
-                            ⚙ Alert Settings
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                                <Icon name="settings" size={14} /> Alert Settings
+                            </span>
                         </button>
                     </div>
                 </div>

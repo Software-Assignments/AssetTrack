@@ -3,23 +3,23 @@
 
 /* ─── Tokens ─────────────────────────────────────────────── */
 :root {
-    --blue:        #2563EB;
-    --blue-hover:  #1D4ED8;
-    --blue-light:  #EFF6FF;
+    --blue:        #0F766E; /* Teal 700 */
+    --blue-hover:  #0D9488; /* Teal 600 */
+    --blue-light:  #F0FDFA; /* Teal 50 */
     --white:       #FFFFFF;
     --surface:     #F8FAFC;
     --border:      #E2E8F0;
-    --text:        #1E293B;
+    --text:        #0F172A;
     --text-muted:  #64748B;
-    --error:       #EF4444;
-    --error-bg:    #FEF2F2;
-    --success:     #16A34A;
-    --success-bg:  #F0FDF4;
-    --radius-sm:   6px;
-    --radius-md:   8px;
-    --radius-lg:   12px;
-    --shadow:      0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-    --shadow-md:   0 4px 12px rgba(0,0,0,.08);
+    --error:       #E11D48;
+    --error-bg:    #FFF1F2;
+    --success:     #059669;
+    --success-bg:  #ECFDF5;
+    --radius-sm:   10px;
+    --radius-md:   16px;
+    --radius-lg:   24px;
+    --shadow:      0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-md:   0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
 }
 
 /* ─── Base ────────────────────────────────────────────────── */
@@ -206,10 +206,10 @@ tbody tr.clickable { cursor: pointer; }
     font-size: 12px;
     font-weight: 500;
 }
-.badge-available  { background: #DCFCE7; color: #15803D; }
-.badge-assigned   { background: #DBEAFE; color: #1D4ED8; }
-.badge-maintenance{ background: #FEF9C3; color: #A16207; }
-.badge-retired    { background: #F1F5F9; color: #64748B; }
+.badge-available  { background: #D1FAE5; color: #065F46; }
+.badge-assigned   { background: #CCFBF1; color: #115E59; }
+.badge-maintenance{ background: #FEF3C7; color: #92400E; }
+.badge-retired    { background: #F1F5F9; color: #475569; }
 
 /* ─── Filter row ──────────────────────────────────────────── */
 .filter-row {

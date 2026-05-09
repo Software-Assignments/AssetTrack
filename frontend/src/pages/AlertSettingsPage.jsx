@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Navbar from '../components/Navbar';
+import Navbar, { Icon } from '../components/Navbar';
 import { useNotifications } from '../context/NotificationContext';
 
 export default function AlertSettingsPage() {
@@ -118,9 +118,9 @@ export default function AlertSettingsPage() {
                 <div className="card" style={{ marginBottom: '20px' }}>
                     <p className="section-title">Preview</p>
                     <div style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.8 }}>
-                        <div>⏰ Warranty warnings: <strong style={{ color: 'var(--text)' }}>{settings.warrantyExpiryDays} days</strong> before expiry</div>
-                        <div>🔴 Expired alerts: <strong style={{ color: 'var(--text)' }}>{settings.showExpiredAlerts ? 'Enabled' : 'Disabled'}</strong></div>
-                        <div>🔧 Maintenance alerts: <strong style={{ color: 'var(--text)' }}>{settings.showMaintenanceAlerts ? 'Enabled' : 'Disabled'}</strong></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Icon name="clock" size={14} /> Warranty warnings: <strong style={{ color: 'var(--text)' }}>{settings.warrantyExpiryDays} days</strong> before expiry</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--error)' }} /> Expired alerts: <strong style={{ color: 'var(--text)' }}>{settings.showExpiredAlerts ? 'Enabled' : 'Disabled'}</strong></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Icon name="settings" size={14} /> Maintenance alerts: <strong style={{ color: 'var(--text)' }}>{settings.showMaintenanceAlerts ? 'Enabled' : 'Disabled'}</strong></div>
                     </div>
                 </div>
 

@@ -8,18 +8,19 @@ import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
+import { Icon } from '../components/Navbar';
 
 const ALLOWED_ROLES = ['ADMIN', 'MANAGER'];
 
 const STATUS_COLORS = {
-    AVAILABLE: '#16A34A',
-    ASSIGNED: '#2563EB',
+    AVAILABLE: '#059669',
+    ASSIGNED: '#0F766E',
     IN_REPAIR: '#D97706',
-    EXPIRED: '#EF4444',
-    DECOMMISSIONED: '#64748B',
+    EXPIRED: '#E11D48',
+    DECOMMISSIONED: '#475569',
 };
 
-const TYPE_COLORS = ['#2563EB', '#7C3AED', '#DB2777', '#D97706', '#16A34A'];
+const TYPE_COLORS = ['#0F766E', '#059669', '#14B8A6', '#0284C7', '#4F46E5'];
 
 function StatCard({ label, value, sub, color, icon, onClick }) {
     return (
@@ -79,7 +80,7 @@ function ExpiryWarningBadge({ asset }) {
             color: isExpired ? '#DC2626' : '#D97706',
             marginLeft: '6px',
         }}>
-            ⚠ {isExpired ? 'Expired' : `${daysLeft}d left`}
+            <Icon name="alert-triangle" size={12} style={{ marginRight: '2px' }} /> {isExpired ? 'Expired' : `${daysLeft}d left`}
         </span>
     );
 }
@@ -206,7 +207,7 @@ export default function DashboardPage() {
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         {unreadCount > 0 && (
                             <span style={{ background: '#FEE2E2', color: '#DC2626', fontSize: '12px', fontWeight: 600, padding: '3px 10px', borderRadius: '999px' }}>
-                                ⚠ {unreadCount} alert{unreadCount > 1 ? 's' : ''}
+                                <Icon name="alert-triangle" size={12} style={{ marginRight: '4px' }} /> {unreadCount} alert{unreadCount > 1 ? 's' : ''}
                             </span>
                         )}
                         <button className="btn btn-primary btn-sm" onClick={fetchAssets}>↻ Refresh</button>
@@ -215,11 +216,11 @@ export default function DashboardPage() {
 
                 {/* KPI cards */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                    <StatCard label="Total Assets" value={total} icon="📦" color="#2563EB" onClick={() => navigate('/assets')} />
-                    <StatCard label="Available" value={byStatus.AVAILABLE ?? 0} icon="✅" color="#16A34A" sub={total ? `${Math.round(((byStatus.AVAILABLE ?? 0) / total) * 100)}% of fleet` : ''} onClick={() => navigate('/assets')} />
-                    <StatCard label="Assigned" value={byStatus.ASSIGNED ?? 0} icon="👤" color="#2563EB" onClick={() => navigate('/assets')} />
-                    <StatCard label="In Repair" value={byStatus.IN_REPAIR ?? 0} icon="🔧" color="#D97706" onClick={() => navigate('/assets')} />
-                    <StatCard label="Expiring Soon" value={flaggedAssets.length} icon="⏰" color="#EF4444" sub={flaggedAssets.length > 0 ? 'Action needed' : 'All good'} />
+                    <StatCard label="Total Assets" value={total} icon={<Icon name="box" size={24} />} color="#0F766E" onClick={() => navigate('/assets')} />
+                    <StatCard label="Available" value={byStatus.AVAILABLE ?? 0} icon={<Icon name="check-circle" size={24} />} color="#059669" sub={total ? `${Math.round(((byStatus.AVAILABLE ?? 0) / total) * 100)}% of fleet` : ''} onClick={() => navigate('/assets')} />
+                    <StatCard label="Assigned" value={byStatus.ASSIGNED ?? 0} icon={<Icon name="user" size={24} />} color="#0F766E" onClick={() => navigate('/assets')} />
+                    <StatCard label="In Repair" value={byStatus.IN_REPAIR ?? 0} icon={<Icon name="settings" size={24} />} color="#D97706" onClick={() => navigate('/assets')} />
+                    <StatCard label="Expiring Soon" value={flaggedAssets.length} icon={<Icon name="clock" size={24} />} color="#E11D48" sub={flaggedAssets.length > 0 ? 'Action needed' : 'All good'} />
                 </div>
 
                 {/* Charts row */}
@@ -276,7 +277,7 @@ export default function DashboardPage() {
                                 <XAxis type="number" fontSize={11} tick={{ fill: '#64748B' }} />
                                 <YAxis type="category" dataKey="name" fontSize={11} tick={{ fill: '#64748B' }} width={55} />
                                 <Tooltip />
-                                <Bar dataKey="count" name="Assets" fill="#2563EB" radius={[0, 4, 4, 0]} />
+                                <Bar dataKey="count" name="Assets" fill="#0F766E" radius={[0, 4, 4, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -286,7 +287,9 @@ export default function DashboardPage() {
                 {flaggedAssets.length > 0 && (
                     <div className="card" style={{ marginBottom: '24px' }}>
                         <p className="section-title" style={{ color: '#DC2626' }}>
-                            ⚠ Expiring / Expired Assets
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Icon name="alert-triangle" size={16} /> Expiring / Expired Assets
+                            </div>
                         </p>
                         <div className="table-wrapper">
                             <table>
@@ -338,9 +341,10 @@ export default function DashboardPage() {
                                 borderBottom: '1px solid var(--border)',
                                 alignItems: 'flex-start',
                             }}>
-                                <span style={{ fontSize: '16px', flexShrink: 0 }}>
-                                    {n.type === 'error' ? '🔴' : n.type === 'warning' ? '🟡' : '🔵'}
-                                </span>
+                                <div style={{ 
+                                    width: '12px', height: '12px', borderRadius: '50%', marginTop: '3px',
+                                    background: n.type === 'error' ? 'var(--error)' : n.type === 'warning' ? '#EAB308' : 'var(--blue)'
+                                }} />
                                 <div>
                                     <div style={{ fontSize: '13px', fontWeight: 500 }}>{n.title}</div>
                                     <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{n.message}</div>

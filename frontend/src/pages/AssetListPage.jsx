@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosInstance';
-import Navbar from '../components/Navbar';
+import Navbar, { Icon } from '../components/Navbar';
 import SearchBar from '../components/SearchBar';
 
 const STATUS_OPTIONS = ['', 'AVAILABLE', 'ASSIGNED', 'IN_REPAIR', 'EXPIRED', 'DECOMMISSIONED'];
@@ -26,7 +26,7 @@ function ExpiryIndicator({ warrantyExpiry }) {
             marginLeft: '6px',
             verticalAlign: 'middle',
         }}>
-            ⚠ {isExpired ? 'Expired' : `${daysLeft}d`}
+            <Icon name="alert-triangle" size={12} style={{ marginRight: '2px' }} /> {isExpired ? 'Expired' : `${daysLeft}d`}
         </span>
     );
 }
@@ -91,8 +91,8 @@ export default function AssetListPage() {
                 <div className="page-header">
                     <h1 className="page-title">Assets</h1>
                     {expiringCount > 0 && (
-                        <span style={{ background: '#FEE2E2', color: '#DC2626', fontSize: '12px', fontWeight: 600, padding: '4px 12px', borderRadius: '999px' }}>
-                            ⚠ {expiringCount} warranty alert{expiringCount > 1 ? 's' : ''}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#FEE2E2', color: '#DC2626', fontSize: '12px', fontWeight: 600, padding: '4px 12px', borderRadius: '999px' }}>
+                            <Icon name="alert-triangle" size={14} /> {expiringCount} warranty alert{expiringCount > 1 ? 's' : ''}
                         </span>
                     )}
                 </div>
