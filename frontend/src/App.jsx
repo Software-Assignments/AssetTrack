@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import LoginPage from './pages/LoginPage';
@@ -11,30 +13,51 @@ import AdvancedSearchPage from './pages/AdvancedSearchPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import ConditionReportPage from './pages/ConditionReportPage';
 import ConditionReportsListPage from './pages/ConditionReportsListPage';
+import DashboardPage from './pages/DashboardPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+import AlertSettingsPage from './pages/AlertSettingsPage';
 
 export default function App() {
   return (
+    <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          {/* Public */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+        <NotificationProvider>
+          <Routes>
+            {/* Public */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
 
-          {/* Protected */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/assets" element={<AssetListPage />} />
-            <Route path="/assets/register" element={<AssetRegistrationPage />} />
-            <Route path="/assets/assign" element={<AssignTransferPage />} />
-            <Route path="/assets/:id" element={<AssetDetailPage />} />
-            <Route path="/search" element={<AdvancedSearchPage />} />
-            <Route path="/search/results" element={<SearchResultsPage />} />
-            <Route path="/condition-report" element={<ConditionReportPage />} />
-            <Route path="/condition-reports" element={<ConditionReportsListPage />} />
-          </Route>
+            {/* Protected */}
+            <Route element={<ProtectedRoute />}>
+              {/* Dashboard (Member 5) */}
+              <Route path="/dashboard" element={<DashboardPage />} />
 
-          {/* Default redirect */}
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
+              {/* Assets */}
+              <Route path="/assets" element={<AssetListPage />} />
+              <Route path="/assets/register" element={<AssetRegistrationPage />} />
+              <Route path="/assets/assign" element={<AssignTransferPage />} />
+              <Route path="/assets/:id" element={<AssetDetailPage />} />
+
+              {/* Search */}
+              <Route path="/search" element={<AdvancedSearchPage />} />
+              <Route path="/search/results" element={<SearchResultsPage />} />
+
+              {/* Condition Reports */}
+              <Route path="/condition-report" element={<ConditionReportPage />} />
+              <Route path="/condition-reports" element={<ConditionReportsListPage />} />
+
+              {/* Analytics (Member 5) */}
+              <Route path="/analytics" element={<AnalyticsPage />} />
+
+              {/* Alert Settings (Member 5) */}
+              <Route path="/alert-settings" element={<AlertSettingsPage />} />
+            </Route>
+
+            {/* Default redirect */}
+            <Route path="*" element={<Navigate to="/dashboard" />} />
+          </Routes>
+        </NotificationProvider>
       </BrowserRouter>
+    </AuthProvider>
   );
 }

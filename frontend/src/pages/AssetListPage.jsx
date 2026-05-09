@@ -4,14 +4,31 @@ import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 import SearchBar from '../components/SearchBar';
 
-// TODO: confirm status values with backend (AVAILABLE, ASSIGNED, MAINTENANCE, RETIRED)
 const STATUS_OPTIONS = ['', 'AVAILABLE', 'ASSIGNED', 'MAINTENANCE', 'RETIRED'];
-// TODO: confirm asset type values with backend (LAPTOP, MONITOR, ACCESSORY)
 const TYPE_OPTIONS   = ['', 'LAPTOP', 'MONITOR', 'ACCESSORY'];
 
 function statusBadge(s) {
     const map = { AVAILABLE: 'badge-available', ASSIGNED: 'badge-assigned', MAINTENANCE: 'badge-maintenance', RETIRED: 'badge-retired' };
     return <span className={`badge ${map[s] ?? ''}`}>{s ?? '—'}</span>;
+}
+
+function ExpiryIndicator({ warrantyExpirationDate }) {
+    if (!warrantyExpirationDate) return null;
+    const daysLeft = Math.ceil((new Date(warrantyExpirationDate) - Date.now()) / 86400000);
+    if (daysLeft > 30) return null;
+    const isExpired = daysLeft <= 0;
+    return (
+        <span title={isExpired ? 'Warranty expired' : `Warranty expires in ${daysLeft} days`} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '3px',
+            padding: '1px 7px', borderRadius: '999px', fontSize: '11px', fontWeight: 600,
+            background: isExpired ? '#FEE2E2' : '#FEF3C7',
+            color: isExpired ? '#DC2626' : '#D97706',
+            marginLeft: '6px',
+            verticalAlign: 'middle',
+        }}>
+            ⚠ {isExpired ? 'Expired' : `${daysLeft}d`}
+        </span>
+    );
 }
 
 export default function AssetListPage() {
@@ -23,15 +40,13 @@ export default function AssetListPage() {
     const [type, setType]       = useState('');
     const [status, setStatus]   = useState('');
 
-    // ── Spare laptop widget state ──
     const [spareLoading, setSpareLoading] = useState(false);
-    const [spare, setSpare]               = useState(null);   // asset object or null
+    const [spare, setSpare]               = useState(null);
     const [spareMsg, setSpareMsg]         = useState('');
 
     const fetchAssets = async () => {
         setLoading(true); setError('');
         try {
-            // TODO: confirm query param names with backend (?search=, ?type=, ?status=)
             const params = {};
             if (search) params.search = search;
             if (type)   params.type   = type;
@@ -45,14 +60,13 @@ export default function AssetListPage() {
         }
     };
 
-    useEffect(() => { fetchAssets(); }, [type, status]);   // refetch on filter change
+    useEffect(() => { fetchAssets(); }, [type, status]);
 
     const handleSearch = () => fetchAssets();
 
     const findSpare = async () => {
         setSpareLoading(true); setSpare(null); setSpareMsg('');
         try {
-            // TODO: confirm spare laptop query params with backend
             const { data } = await api.get('/assets', { params: { type: 'LAPTOP', status: 'AVAILABLE' } });
             const list = Array.isArray(data) ? data : data.content ?? [];
             if (list.length === 0) { setSpareMsg('No spare laptops available.'); }
@@ -64,12 +78,22 @@ export default function AssetListPage() {
         }
     };
 
+    const expiringCount = assets.filter(a => {
+        if (!a.warrantyExpirationDate) return false;
+        return Math.ceil((new Date(a.warrantyExpirationDate) - Date.now()) / 86400000) <= 30;
+    }).length;
+
     return (
         <>
             <Navbar />
             <div className="page-wrapper">
                 <div className="page-header">
                     <h1 className="page-title">Assets</h1>
+                    {expiringCount > 0 && (
+                        <span style={{ background: '#FEE2E2', color: '#DC2626', fontSize: '12px', fontWeight: 600, padding: '4px 12px', borderRadius: '999px' }}>
+                            ⚠ {expiringCount} warranty alert{expiringCount > 1 ? 's' : ''}
+                        </span>
+                    )}
                 </div>
 
                 {/* Spare laptop widget */}
@@ -82,8 +106,7 @@ export default function AssetListPage() {
                         <div className="spare-widget-result">
                             <strong>{spare.brand} {spare.model}</strong> &nbsp;·&nbsp; S/N: {spare.serialNumber}
                             {spare.lastOwner && <> &nbsp;·&nbsp; Last owner: {spare.lastOwner?.email ?? spare.lastOwner}</>}
-                            &nbsp;
-                            <a href={`/assets/${spare.id}`}>View details →</a>
+                            &nbsp;<a href={`/assets/${spare.id}`}>View details →</a>
                         </div>
                     )}
                 </div>
@@ -93,11 +116,7 @@ export default function AssetListPage() {
                     <div className="filter-row">
                         <div className="form-group">
                             <label>Search</label>
-                            <SearchBar
-                                value={search}
-                                onChange={setSearch}
-                                placeholder="Serial number, brand, model…"
-                            />
+                            <SearchBar value={search} onChange={setSearch} placeholder="Serial number, brand, model…" />
                         </div>
                         <div className="form-group">
                             <label>Type</label>
@@ -117,7 +136,6 @@ export default function AssetListPage() {
                     </div>
                 </div>
 
-                {/* Table */}
                 {error && <div className="alert alert-error">{error}</div>}
 
                 <div className="card">
@@ -129,22 +147,43 @@ export default function AssetListPage() {
                         <div className="table-wrapper">
                             <table>
                                 <thead>
-                                <tr>
-                                    <th>Type</th><th>Brand</th><th>Model</th>
-                                    <th>Serial No.</th><th>Status</th><th>Assigned To</th>
-                                </tr>
+                                    <tr>
+                                        <th>Type</th><th>Brand / Model</th>
+                                        <th>Serial No.</th><th>Status</th><th>Assigned To</th><th>Warranty</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {assets.map(a => (
-                                    <tr key={a.id} className="clickable" onClick={() => navigate(`/assets/${a.id}`)}>
-                                        <td>{a.type ?? '—'}</td>
-                                        <td>{a.brand ?? '—'}</td>
-                                        <td>{a.model ?? '—'}</td>
-                                        <td>{a.serialNumber ?? '—'}</td>
-                                        <td>{statusBadge(a.status)}</td>
-                                        <td>{a.assignedTo?.email ?? a.assignedTo ?? '—'}</td>
-                                    </tr>
-                                ))}
+                                    {assets.map(a => {
+                                        const daysLeft = a.warrantyExpirationDate
+                                            ? Math.ceil((new Date(a.warrantyExpirationDate) - Date.now()) / 86400000)
+                                            : null;
+                                        const isExpired = daysLeft !== null && daysLeft <= 0;
+                                        const isExpiring = daysLeft !== null && daysLeft > 0 && daysLeft <= 30;
+                                        return (
+                                            <tr
+                                                key={a.id}
+                                                className="clickable"
+                                                onClick={() => navigate(`/assets/${a.id}`)}
+                                                style={{
+                                                    background: isExpired ? '#FFF5F5' : isExpiring ? '#FFFBEB' : undefined,
+                                                }}
+                                            >
+                                                <td>{a.type ?? '—'}</td>
+                                                <td>
+                                                    <strong>{a.brand} {a.model}</strong>
+                                                    <ExpiryIndicator warrantyExpirationDate={a.warrantyExpirationDate} />
+                                                </td>
+                                                <td>{a.serialNumber ?? '—'}</td>
+                                                <td>{statusBadge(a.status)}</td>
+                                                <td>{a.assignedTo?.email ?? a.assignedTo ?? '—'}</td>
+                                                <td style={{ fontSize: '12px', color: isExpired ? '#DC2626' : isExpiring ? '#D97706' : 'var(--text-muted)' }}>
+                                                    {a.warrantyExpirationDate
+                                                        ? new Date(a.warrantyExpirationDate).toLocaleDateString()
+                                                        : '—'}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
