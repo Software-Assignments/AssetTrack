@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 
 function fmt(dateStr) {
     if (!dateStr) return '—';
@@ -11,10 +12,11 @@ function fmt(dateStr) {
 export default function AssetDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [asset, setAsset]     = useState(null);
+    const { user } = useAuth();
+    const [asset, setAsset] = useState(null);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError]     = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const load = async () => {
@@ -39,8 +41,18 @@ export default function AssetDetailPage() {
         load();
     }, [id]);
 
+    const handleDelete = async () => {
+        if (!window.confirm("Are you sure you want to delete this asset?")) return;
+        try {
+            await api.delete(`/assets/${id}`);
+            navigate('/assets');
+        } catch (e) {
+            setError(e.response?.data?.message || 'Failed to delete asset. It might still be assigned to a user.');
+        }
+    };
+
     if (loading) return <><Navbar /><div className="spinner-wrap"><div className="spinner" /></div></>;
-    if (error)   return <><Navbar /><div className="page-wrapper"><div className="alert alert-error">{error}</div></div></>;
+    if (error) return <><Navbar /><div className="page-wrapper"><div className="alert alert-error">{error}</div></div></>;
 
     return (
         <>
@@ -48,7 +60,14 @@ export default function AssetDetailPage() {
             <div className="page-wrapper">
                 <div className="page-header">
                     <h1 className="page-title">Asset Detail</h1>
-                    <button className="btn btn-secondary btn-sm" onClick={() => navigate('/assets')}>← Back to Assets</button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {user?.role === 'ADMIN' && (
+                            <button className="btn btn-secondary btn-sm" style={{ color: '#DC2626', borderColor: '#FCA5A5' }} onClick={handleDelete}>
+                                Delete Asset
+                            </button>
+                        )}
+                        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/assets')}>← Back to Assets</button>
+                    </div>
                 </div>
 
                 <div className="card" style={{ marginBottom: 20 }}>
@@ -73,20 +92,20 @@ export default function AssetDetailPage() {
                         <div className="table-wrapper">
                             <table>
                                 <thead>
-                                <tr>
-                                    <th>User Email</th>
-                                    <th>Assign Date</th>
-                                    <th>Return Date</th>
-                                </tr>
+                                    <tr>
+                                        <th>User Email</th>
+                                        <th>Assign Date</th>
+                                        <th>Return Date</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {history.map((h, i) => (
-                                    <tr key={i}>
-                                        <td>{h.userEmail ?? h.userFullName ?? '—'}</td>
-                                        <td>{fmt(h.assignDate)}</td>
-                                        <td>{fmt(h.returnDate)}</td>
-                                    </tr>
-                                ))}
+                                    {history.map((h, i) => (
+                                        <tr key={i}>
+                                            <td>{h.userEmail ?? h.userFullName ?? '—'}</td>
+                                            <td>{fmt(h.assignDate)}</td>
+                                            <td>{fmt(h.returnDate)}</td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
