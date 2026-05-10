@@ -20,7 +20,7 @@ const NAV_ITEMS = [
         label: 'Register Asset',
         path: '/assets/register',
         icon: 'plus-circle',
-        roles: ['ADMIN', 'MANAGER'],
+        roles: ['ADMIN'],
     },
     {
         label: 'Assign / Transfer',
@@ -56,13 +56,13 @@ const NAV_ITEMS = [
         label: 'Alert Settings',
         path: '/alert-settings',
         icon: 'settings',
-        roles: ['ADMIN', 'MANAGER'],
+        roles: ['ADMIN'],
     },
     {
         label: 'Users',
         path: '/users',
         icon: 'users',
-        roles: ['ADMIN', 'MANAGER'],
+        roles: ['ADMIN'],
     },
 ];
 
