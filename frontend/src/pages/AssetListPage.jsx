@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosInstance';
 import Navbar, { Icon } from '../components/Navbar';
 import SearchBar from '../components/SearchBar';
+import { useAuth } from '../context/AuthContext';
 
 const STATUS_OPTIONS = ['', 'AVAILABLE', 'ASSIGNED', 'IN_REPAIR', 'EXPIRED', 'DECOMMISSIONED'];
-const TYPE_OPTIONS   = ['', 'LAPTOP', 'SCREEN', 'ACCESSORY'];
+const TYPE_OPTIONS = ['', 'LAPTOP', 'SCREEN', 'ACCESSORY'];
 
 function statusBadge(s) {
     const map = { AVAILABLE: 'badge-available', ASSIGNED: 'badge-assigned', IN_REPAIR: 'badge-maintenance', EXPIRED: 'badge-expired', DECOMMISSIONED: 'badge-retired' };
@@ -33,23 +34,24 @@ function ExpiryIndicator({ warrantyExpiry }) {
 
 export default function AssetListPage() {
     const navigate = useNavigate();
-    const [assets, setAssets]   = useState([]);
+    const { user } = useAuth();
+    const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError]     = useState('');
-    const [search, setSearch]   = useState('');
-    const [type, setType]       = useState('');
-    const [status, setStatus]   = useState('');
+    const [error, setError] = useState('');
+    const [search, setSearch] = useState('');
+    const [type, setType] = useState('');
+    const [status, setStatus] = useState('');
 
     const [spareLoading, setSpareLoading] = useState(false);
-    const [spare, setSpare]               = useState(null);
-    const [spareMsg, setSpareMsg]         = useState('');
+    const [spare, setSpare] = useState(null);
+    const [spareMsg, setSpareMsg] = useState('');
 
     const fetchAssets = async () => {
         setLoading(true); setError('');
         try {
             const params = {};
             if (search) params.serialNumber = search;
-            if (type)   params.type   = type;
+            if (type) params.type = type;
             if (status) params.status = status;
             const { data } = await api.get('/assets/search', { params });
             setAssets(Array.isArray(data) ? data : data.content ?? []);
@@ -89,7 +91,10 @@ export default function AssetListPage() {
             <Navbar />
             <div className="page-wrapper">
                 <div className="page-header">
-                    <h1 className="page-title">Assets</h1>
+                    <div>
+                        <h1 className="page-title">Welcome, {user?.email?.split('@')[0] || user?.username || 'User'}!</h1>
+                        <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '13px' }}>Asset Management Directory</p>
+                    </div>
                     {expiringCount > 0 && (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#FEE2E2', color: '#DC2626', fontSize: '12px', fontWeight: 600, padding: '4px 12px', borderRadius: '999px' }}>
                             <Icon name="alert-triangle" size={14} /> {expiringCount} warranty alert{expiringCount > 1 ? 's' : ''}

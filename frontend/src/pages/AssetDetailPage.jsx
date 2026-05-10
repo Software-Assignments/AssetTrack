@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 
 function fmt(dateStr) {
     if (!dateStr) return '—';
@@ -15,6 +16,26 @@ export default function AssetDetailPage() {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError]     = useState('');
+    const { user } = useAuth();
+    const isManagerOrAdmin = user?.role === 'ADMIN' || user?.role === 'MANAGER';
+
+    const markInRepair = async () => {
+        try {
+            const { data } = await api.patch(`/assets/${id}/mark-in-repair`);
+            setAsset(data);
+        } catch {
+            setError('Failed to mark asset as IN_REPAIR.');
+        }
+    };
+
+    const markRepaired = async () => {
+        try {
+            const { data } = await api.patch(`/assets/${id}/mark-repaired`);
+            setAsset(data);
+        } catch {
+            setError('Failed to mark asset as Repaired.');
+        }
+    };
 
     useEffect(() => {
         const load = async () => {
@@ -63,6 +84,20 @@ export default function AssetDetailPage() {
                         <div className="detail-item"><label>Purchase Date</label><p>{fmt(asset?.purchaseDate)}</p></div>
                         <div className="detail-item"><label>Warranty Expires</label><p>{fmt(asset?.warrantyExpiry)}</p></div>
                     </div>
+                    {isManagerOrAdmin && asset && (
+                        <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                            {asset.status !== 'DECOMMISSIONED' && asset.status !== 'EXPIRED' && asset.status !== 'IN_REPAIR' && (
+                                <button className="btn btn-primary" onClick={markInRepair}>
+                                    Send to Repair
+                                </button>
+                            )}
+                            {asset.status === 'IN_REPAIR' && (
+                                <button className="btn btn-primary" onClick={markRepaired}>
+                                    Mark as Repaired
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="card">

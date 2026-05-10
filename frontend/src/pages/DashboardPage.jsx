@@ -123,6 +123,7 @@ function SuggestedAction({ asset }) {
 export default function DashboardPage() {
     const navigate = useNavigate();
     const { notifications, unreadCount } = useNotifications();
+    const { user } = useAuth();
 
     const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -197,10 +198,10 @@ export default function DashboardPage() {
                 {/* Header */}
                 <div className="page-header">
                     <div>
-                        <h1 className="page-title">Dashboard</h1>
+                        <h1 className="page-title">Welcome, {user?.email?.split('@')[0] || user?.username || 'User'}!</h1>
                         {lastUpdated && (
                             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                Last updated: {lastUpdated.toLocaleTimeString()} · auto-refreshes every 30s
+                                Dashboard Overview · Last updated: {lastUpdated.toLocaleTimeString()} · auto-refreshes every 30s
                             </div>
                         )}
                     </div>
@@ -341,7 +342,7 @@ export default function DashboardPage() {
                                 borderBottom: '1px solid var(--border)',
                                 alignItems: 'flex-start',
                             }}>
-                                <div style={{ 
+                                <div style={{
                                     width: '12px', height: '12px', borderRadius: '50%', marginTop: '3px',
                                     background: n.type === 'error' ? 'var(--error)' : n.type === 'warning' ? '#EAB308' : 'var(--blue)'
                                 }} />
