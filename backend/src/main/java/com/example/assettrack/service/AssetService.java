@@ -292,7 +292,8 @@ public class AssetService {
         Specification<Asset> spec = (root, query, cb) -> cb.and(
             cb.lessThan(root.get("warrantyExpiry"), today),
             cb.notEqual(root.get("status"), AssetStatus.DECOMMISSIONED),
-            cb.notEqual(root.get("status"), AssetStatus.EXPIRED)
+            cb.notEqual(root.get("status"), AssetStatus.EXPIRED),
+            cb.notEqual(root.get("status"), AssetStatus.IN_REPAIR)
         );
 
         for (Asset asset : assetRepository.findAll(spec)) {
