@@ -12,8 +12,7 @@ function fmt(dateStr) {
 export default function AssetDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
-    const [asset, setAsset] = useState(null);
+    const [asset, setAsset]     = useState(null);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError]     = useState('');
@@ -72,7 +71,7 @@ export default function AssetDetailPage() {
     };
 
     if (loading) return <><Navbar /><div className="spinner-wrap"><div className="spinner" /></div></>;
-    if (error) return <><Navbar /><div className="page-wrapper"><div className="alert alert-error">{error}</div></div></>;
+    if (error)   return <><Navbar /><div className="page-wrapper"><div className="alert alert-error">{error}</div></div></>;
 
     return (
         <>
@@ -126,20 +125,20 @@ export default function AssetDetailPage() {
                         <div className="table-wrapper">
                             <table>
                                 <thead>
-                                    <tr>
-                                        <th>User Email</th>
-                                        <th>Assign Date</th>
-                                        <th>Return Date</th>
-                                    </tr>
+                                <tr>
+                                    <th>User Email</th>
+                                    <th>Assign Date</th>
+                                    <th>Return Date</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    {history.map((h, i) => (
-                                        <tr key={i}>
-                                            <td>{h.userEmail ?? h.userFullName ?? '—'}</td>
-                                            <td>{fmt(h.assignDate)}</td>
-                                            <td>{fmt(h.returnDate)}</td>
-                                        </tr>
-                                    ))}
+                                {history.map((h, i) => (
+                                    <tr key={i}>
+                                        <td>{h.userEmail ?? h.userFullName ?? '—'}</td>
+                                        <td>{fmt(h.assignDate)}</td>
+                                        <td>{fmt(h.returnDate)}</td>
+                                    </tr>
+                                ))}
                                 </tbody>
                             </table>
                         </div>

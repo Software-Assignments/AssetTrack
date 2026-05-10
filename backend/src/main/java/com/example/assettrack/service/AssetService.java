@@ -193,7 +193,7 @@ public class AssetService {
     public List<AssetResponseDTO> listAssets() {
         refreshExpiredAssets();
         List<AssetResponseDTO> responses = new ArrayList<>();
-        for (Asset asset : assetRepository.findAll()) {
+        for (Asset asset : assetRepository.findAllWithOwner()) {
             responses.add(toResponse(asset, defaultExpiryWindowDays));
         }
         return responses;
