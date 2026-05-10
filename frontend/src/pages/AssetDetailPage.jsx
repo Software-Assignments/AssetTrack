@@ -59,7 +59,7 @@ export default function AssetDetailPage() {
                         <div className="detail-item"><label>Model</label><p>{asset?.model ?? '—'}</p></div>
                         <div className="detail-item"><label>Serial Number</label><p>{asset?.serialNumber ?? '—'}</p></div>
                         <div className="detail-item"><label>Status</label><p>{asset?.status ?? '—'}</p></div>
-                        <div className="detail-item"><label>Assigned To</label><p>{asset?.assignedTo?.email ?? asset?.assignedTo ?? '—'}</p></div>
+                        <div className="detail-item"><label>Assigned To</label><p>{asset?.currentOwnerEmail ?? '—'}</p></div>
                         <div className="detail-item"><label>Purchase Date</label><p>{fmt(asset?.purchaseDate)}</p></div>
                         <div className="detail-item"><label>Warranty Expires</label><p>{fmt(asset?.warrantyExpiry)}</p></div>
                     </div>

@@ -61,7 +61,7 @@ function StatCard({ label, value, sub, color, icon, onClick }) {
 }
 
 function ExpiryWarningBadge({ asset }) {
-    const expiry = asset.warrantyExpirationDate ? new Date(asset.warrantyExpirationDate) : null;
+    const expiry = asset.warrantyExpiry ? new Date(asset.warrantyExpiry) : null;
     if (!expiry) return null;
     const daysLeft = Math.ceil((expiry - Date.now()) / 86400000);
     if (daysLeft > 30) return null;
@@ -87,7 +87,7 @@ function ExpiryWarningBadge({ asset }) {
 
 function SuggestedAction({ asset }) {
     const navigate = useNavigate();
-    const expiry = asset.warrantyExpirationDate ? new Date(asset.warrantyExpirationDate) : null;
+    const expiry = asset.warrantyExpiry ? new Date(asset.warrantyExpiry) : null;
     const daysLeft = expiry ? Math.ceil((expiry - Date.now()) / 86400000) : null;
     const isExpired = daysLeft !== null && daysLeft <= 0;
 
@@ -163,16 +163,16 @@ export default function DashboardPage() {
 
     // Expiring/expired assets
     const flaggedAssets = assets.filter(a => {
-        if (!a.warrantyExpirationDate) return false;
-        const daysLeft = Math.ceil((new Date(a.warrantyExpirationDate) - Date.now()) / 86400000);
+        if (!a.warrantyExpiry) return false;
+        const daysLeft = Math.ceil((new Date(a.warrantyExpiry) - Date.now()) / 86400000);
         return daysLeft <= 30;
-    }).sort((a, b) => new Date(a.warrantyExpirationDate) - new Date(b.warrantyExpirationDate));
+    }).sort((a, b) => new Date(a.warrantyExpiry) - new Date(b.warrantyExpiry));
 
     // User allocation (by assignedTo email)
     const byUser = assets
-        .filter(a => a.assignedTo)
+        .filter(a => a.currentOwnerEmail)
         .reduce((acc, a) => {
-            const email = a.assignedTo?.email ?? a.assignedTo ?? 'Unknown';
+            const email = a.currentOwnerEmail ?? 'Unknown';
             acc[email] = (acc[email] ?? 0) + 1;
             return acc;
         }, {});
@@ -316,9 +316,9 @@ export default function DashboardPage() {
                                                     {a.status ?? '—'}
                                                 </span>
                                             </td>
-                                            <td>{a.assignedTo?.email ?? a.assignedTo ?? '—'}</td>
+                                            <td>{a.currentOwnerEmail ?? '—'}</td>
                                             <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                                                {a.warrantyExpirationDate ? new Date(a.warrantyExpirationDate).toLocaleDateString() : '—'}
+                                                {a.warrantyExpiry ? new Date(a.warrantyExpiry).toLocaleDateString() : '—'}
                                             </td>
                                             <td onClick={e => e.stopPropagation()}>
                                                 <SuggestedAction asset={a} />

@@ -106,7 +106,7 @@ export default function AssetListPage() {
                     {spare && (
                         <div className="spare-widget-result">
                             <strong>{spare.brand} {spare.model}</strong> &nbsp;·&nbsp; S/N: {spare.serialNumber}
-                            {spare.lastOwner && <> &nbsp;·&nbsp; Last owner: {spare.lastOwner?.email ?? spare.lastOwner}</>}
+                            {spare.lastOwnerEmail && <> &nbsp;·&nbsp; Last owner: {spare.lastOwnerEmail}</>}
                             &nbsp;<a href={`/assets/${spare.id}`}>View details →</a>
                         </div>
                     )}
@@ -176,7 +176,7 @@ export default function AssetListPage() {
                                                 </td>
                                                 <td>{a.serialNumber ?? '—'}</td>
                                                 <td>{statusBadge(a.status)}</td>
-                                                <td>{a.assignedTo?.email ?? a.assignedTo ?? '—'}</td>
+                                                <td>{a.currentOwnerEmail ?? '—'}</td>
                                                 <td style={{ fontSize: '12px', color: isExpired ? '#DC2626' : isExpiring ? '#D97706' : 'var(--text-muted)' }}>
                                                     {a.warrantyExpiry
                                                         ? new Date(a.warrantyExpiry).toLocaleDateString()

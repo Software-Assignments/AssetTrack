@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar, { Icon } from '../components/Navbar';
 import api from '../api/axiosInstance';
 
-const ROLES = ['ADMIN', 'MANAGER', 'DEVELOPER', 'USER'];
+const ROLES = ['ADMIN', 'MANAGER', 'DEVELOPER'];
 
 const roleBadge = {
     ADMIN:     { bg: '#FEE2E2', color: '#DC2626' },

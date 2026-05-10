@@ -94,9 +94,9 @@ export default function ConditionReportsListPage() {
                                 {reports.map((r, i) => (
                                     <tr
                                         key={r.id ?? i}
-                                        className={r.asset?.id ? 'clickable' : ''}
-                                        onClick={() => r.asset?.id && navigate(`/assets/${r.asset.id}`)}
-                                        title={r.asset?.id ? 'View asset details' : undefined}
+                                        className={r.assetId ? 'clickable' : ''}
+                                        onClick={() => r.assetId && navigate(`/assets/${r.assetId}`)}
+                                        title={r.assetId ? 'View asset details' : undefined}
                                     >
                                         <td>
                                             {`${r.assetBrand ?? ''} ${r.assetModel ?? ''}`.trim() || r.assetId || '—'}

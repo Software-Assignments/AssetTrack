@@ -4,7 +4,7 @@ import api from '../api/axiosInstance';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
-const ALLOWED_ROLES = ['ADMIN', 'MANAGER'];
+const ALLOWED_ROLES = ['ADMIN'];
 const ASSET_TYPES = ['LAPTOP', 'SCREEN', 'ACCESSORY'];
 
 const EMPTY = { type: '', brand: '', model: '', serialNumber: '', purchaseDate: '', warrantyExpiry: '' };

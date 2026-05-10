@@ -9,6 +9,7 @@ export default function AssignTransferPage() {
     const [users, setUsers]     = useState([]);
     const [assetId, setAssetId] = useState('');
     const [userId, setUserId]   = useState('');
+    const [transfer, setTransfer] = useState(false);
     const [loading, setLoading] = useState(false);
     const [fetchErr, setFetchErr] = useState('');
     const [error, setError]     = useState('');
@@ -36,7 +37,7 @@ export default function AssignTransferPage() {
         setError(''); setSuccess('');
         setLoading(true);
         try {
-            await api.post(`/assets/${assetId}/allocate`, { userId, transfer: false });
+            await api.post(`/assets/${assetId}/allocate`, { userId, transfer });
             setSuccess('Asset assigned successfully!');
             setTimeout(() => navigate(`/assets/${assetId}`), 1500);
         } catch (err) {
@@ -83,8 +84,18 @@ export default function AssignTransferPage() {
                                 ))}
                             </select>
                         </div>
+                        <div className="form-group" style={{ marginBottom: 20 }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={transfer}
+                                    onChange={e => setTransfer(e.target.checked)}
+                                />
+                                Transfer (asset is already assigned to someone else)
+                            </label>
+                        </div>
                         <button className="btn btn-primary" type="submit" disabled={loading || !!fetchErr}>
-                            {loading ? 'Assigning…' : 'Assign Asset'}
+                            {loading ? (transfer ? 'Transferring…' : 'Assigning…') : (transfer ? 'Transfer Asset' : 'Assign Asset')}
                         </button>
                     </form>
                 </div>

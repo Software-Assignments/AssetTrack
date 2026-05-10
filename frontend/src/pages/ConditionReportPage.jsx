@@ -25,7 +25,7 @@ export default function ConditionReportPage() {
             setAssetsError('');
             try {
                 const params = {};
-                if (user?.id) params.assignedTo = user.id;
+                if (user?.email) params.assignedUser = user.email;
                 const { data } = await api.get('/assets/search', { params });
                 setAssets(Array.isArray(data) ? data : data.content ?? []);
             } catch {
